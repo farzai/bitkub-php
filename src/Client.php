@@ -57,8 +57,7 @@ class Client
         array $config = [],
         PsrClientInterface $client = null,
         LoggerInterface $logger = null
-    )
-    {
+    ) {
         $this->config = array_merge([
             'base_uri' => self::BASE_URI,
             'api_key' => '',
@@ -119,11 +118,11 @@ class Client
     protected function createRequest(string $method, string $path, array $options = []): PsrRequestInterface
     {
         // Normalize path
-        $path = '/' . trim($path, '/');
+        $path = '/'.trim($path, '/');
 
         // Query
         if (isset($options['query'])) {
-            $path .= '?' . http_build_query($options['query']);
+            $path .= '?'.http_build_query($options['query']);
         }
 
         // Set body
@@ -133,7 +132,7 @@ class Client
                 $body = json_encode($body);
             }
         }
-        
+
         $headers = [
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
@@ -143,7 +142,7 @@ class Client
 
         // Set base URI
         $request = $request->withUri(new Uri(self::BASE_URI));
-        
+
         // Set path
         $request = $request->withUri($request->getUri()->withPath($path));
 
@@ -159,7 +158,7 @@ class Client
 
             $uri = $request->getUri();
             $query = $uri->getQuery();
-            
+
             $timestamp = (int) $this->getServerTimestamp()
                 ->throw()
                 ->body();
@@ -187,7 +186,7 @@ class Client
      */
     protected function isSecureEndpoint(string $method, string $path): bool
     {
-        $path = strtoupper($method) . ' ' . $path;
+        $path = strtoupper($method).' '.$path;
 
         return in_array($path, $this->secureEndpoints);
     }
