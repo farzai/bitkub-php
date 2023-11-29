@@ -13,4 +13,4 @@ phpunit.xml
 psalm.xml
 vendor
 .php-cs-fixer.cache
-
+.env

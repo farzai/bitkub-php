@@ -16,7 +16,7 @@ We are not affiliated, associated, authorized, endorsed by, or in any way offici
 You can install the package via composer:
 
 ```bash
-composer require farzai/bitkub
+composer require farzai/bitkub@dev-main
 ```
 
 ## Usage
