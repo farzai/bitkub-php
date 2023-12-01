@@ -17,6 +17,7 @@ class Client
     const BASE_URI = 'https://api.bitkub.com';
 
     protected $secureEndpoints = [
+        // V3
         'POST /api/v3/market/wallet',
         'POST /api/v3/user/trading-credits',
         'POST /api/v3/market/place-bid',
@@ -96,9 +97,28 @@ class Client
         return new Response($request, $this->transport->sendRequest($request));
     }
 
+    public function getWallet(): ResponseInterface
+    {
+        return $this->post('/api/v3/market/wallet');
+    }
+
     public function getBalances(): ResponseInterface
     {
         return $this->post('/api/v3/market/balances');
+    }
+
+    public function getOpenOrders(string $sym): ResponseInterface
+    {
+        return $this->get('/api/v3/market/my-open-orders', [
+            'query' => [
+                'sym' => $sym,
+            ],
+        ]);
+    }
+
+    public function getUserLimits(): ResponseInterface
+    {
+        return $this->post('/api/v3/user/limits');
     }
 
     protected function get(string $path, array $options = []): ResponseInterface
@@ -158,10 +178,8 @@ class Client
 
             $uri = $request->getUri();
             $query = $uri->getQuery();
-
-            $timestamp = (int) $this->getServerTimestamp()
-                ->throw()
-                ->body();
+            $body = $request->getBody()->getContents() ?: '';
+            $timestamp = (int) (microtime(true) * 1000);
 
             $signature = $authorizer->generateSignature(
                 $this->config['secret'],
@@ -169,7 +187,7 @@ class Client
                 $request->getMethod(),
                 $uri->getPath(),
                 $query,
-                $request->getBody()?->getContents() ?? ''
+                $body
             );
 
             $request = $request

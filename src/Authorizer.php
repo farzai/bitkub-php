@@ -21,14 +21,11 @@ class Authorizer
         $method = strtoupper($method);
         $path = '/'.trim($path, '/');
 
-        $message = sprintf(
-            '%s%s%s%s%s',
-            $timestamp,
-            $method,
-            $path,
-            empty($query) ? '' : '?'.$query,
-            $payload
-        );
+        if (! empty($query)) {
+            $query = '?'.$query;
+        }
+
+        $message = sprintf('%s%s%s%s%s', $timestamp, $method, $path, $query, $payload);
 
         return hash_hmac('sha256', $message, $secretKey);
     }
