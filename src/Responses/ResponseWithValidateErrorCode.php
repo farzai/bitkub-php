@@ -10,7 +10,6 @@ class ResponseWithValidateErrorCode extends AbstractResponseDecorator
     /**
      * Throw an exception if the response is not successfull.
      *
-     * @param  callable|null  $callback
      *
      * @throws \Psr\Http\Client\ClientExceptionInterface
      */
