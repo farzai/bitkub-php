@@ -15,4 +15,4 @@ $response = $client->getBalances();
 // $response = $client->getOpenOrders('THB_BTC');
 // $response = $client->getUserLimits();
 
-dd($response->json());
+dd($response->json('result'));

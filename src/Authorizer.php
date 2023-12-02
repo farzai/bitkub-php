@@ -10,6 +10,9 @@ class Authorizer
      * The signature is in hex format.
      * The user has to attach the signature via the Request Header You must get a new timestamp in millisecond from /api/v3/servertime.
      * The old one is in second.
+     *
+     *
+     * @return string $signature
      */
     public function generateSignature(string $secretKey, int $timestamp, string $method, string $path, string $query = '', string $payload = ''): string
     {

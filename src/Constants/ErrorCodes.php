@@ -145,6 +145,9 @@ class ErrorCodes
         self::SERVER_ERROR => 'Server error (please contact support)',
     ];
 
+    /**
+     * Get all error codes.
+     */
     public static function all(): array
     {
         $reflection = new \ReflectionClass(__CLASS__);
@@ -154,8 +157,11 @@ class ErrorCodes
         }, array_keys($reflection->getConstants()));
     }
 
+    /**
+     * Get the description of the error code.
+     */
     public static function getDescription(int $code): string
     {
-        return $descriptions[$code] ?? 'Unknown error';
+        return self::DESCRIPTIONS[$code] ?? "Unknown error code: {$code}";
     }
 }

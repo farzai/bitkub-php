@@ -2,6 +2,7 @@
 
 namespace Farzai\Bitkub;
 
+use Farzai\Bitkub\Responses\ResponseWithValidateErrorCode;
 use Farzai\Transport\Contracts\ResponseInterface;
 use Farzai\Transport\Request;
 use Farzai\Transport\Response;
@@ -10,6 +11,7 @@ use Farzai\Transport\TransportBuilder;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Client\ClientInterface as PsrClientInterface;
 use Psr\Http\Message\RequestInterface as PsrRequestInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Log\LoggerInterface;
 
 class Client
@@ -125,50 +127,14 @@ class Client
     {
         $request = $this->createRequest('GET', $path, $options);
 
-        return new Response($request, $this->transport->sendRequest($request));
+        return $this->createResponse($request, $this->transport->sendRequest($request));
     }
 
     protected function post(string $path, array $options = []): ResponseInterface
     {
         $request = $this->createRequest('POST', $path, $options);
 
-        return new Response($request, $this->transport->sendRequest($request));
-    }
-
-    protected function createRequest(string $method, string $path, array $options = []): PsrRequestInterface
-    {
-        // Normalize path
-        $path = '/'.trim($path, '/');
-
-        // Query
-        if (isset($options['query'])) {
-            $path .= '?'.http_build_query($options['query']);
-        }
-
-        // Set body
-        if (isset($options['body'])) {
-            $body = $options['body'];
-            if (is_array($body)) {
-                $body = json_encode($body);
-            }
-        }
-
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-
-        $request = new Request($method, $path, $headers, $body ?? null);
-
-        // Set base URI
-        $request = $request->withUri(new Uri(self::BASE_URI));
-
-        // Set path
-        $request = $request->withUri($request->getUri()->withPath($path));
-
-        $request = $this->ensureRequestAreSecure($request);
-
-        return $request;
+        return $this->createResponse($request, $this->transport->sendRequest($request));
     }
 
     protected function ensureRequestAreSecure(PsrRequestInterface $request): PsrRequestInterface
@@ -207,6 +173,56 @@ class Client
         $path = strtoupper($method).' '.$path;
 
         return in_array($path, $this->secureEndpoints);
+    }
+
+    /**
+     * Create a new request instance.
+     */
+    protected function createRequest(string $method, string $path, array $options = []): PsrRequestInterface
+    {
+        // Normalize path
+        $path = '/'.trim($path, '/');
+
+        // Query
+        if (isset($options['query'])) {
+            $path .= '?'.http_build_query($options['query']);
+        }
+
+        // Set body
+        if (isset($options['body'])) {
+            $body = $options['body'];
+            if (is_array($body)) {
+                $body = json_encode($body);
+            }
+        }
+
+        $headers = [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ];
+
+        $request = new Request($method, $path, $headers, $body ?? null);
+
+        // Set base URI
+        $request = $request->withUri(new Uri(self::BASE_URI));
+
+        // Set path
+        $request = $request->withUri($request->getUri()->withPath($path));
+
+        $request = $this->ensureRequestAreSecure($request);
+
+        return $request;
+    }
+
+    /**
+     * Create a new response instance.
+     */
+    protected function createResponse(PsrRequestInterface $request, PsrResponseInterface $baseResponse): ResponseInterface
+    {
+        $response = new Response($request, $baseResponse);
+        $response = new ResponseWithValidateErrorCode($response);
+
+        return $response;
     }
 
     private function ensureConfigIsValid(): void
