@@ -6,7 +6,7 @@ use Farzai\Transport\Contracts\ResponseInterface;
 use Farzai\Transport\Traits\PsrResponseTrait;
 use Psr\Http\Message\RequestInterface as PsrRequestInterface;
 
-abstract class ResponseDecorator implements ResponseInterface
+abstract class AbstractResponseDecorator implements ResponseInterface
 {
     use PsrResponseTrait;
 

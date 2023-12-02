@@ -5,7 +5,7 @@ namespace Farzai\Bitkub\Responses;
 use Farzai\Bitkub\Constants\ErrorCodes;
 use Farzai\Transport\Contracts\ResponseInterface;
 
-class ResponseWithValidateErrorCode extends ResponseDecorator
+class ResponseWithValidateErrorCode extends AbstractResponseDecorator
 {
     /**
      * Throw an exception if the response is not successfull.
