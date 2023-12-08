@@ -13,7 +13,7 @@ class ResponseWithValidateErrorCode extends AbstractResponseDecorator
      *
      * @throws \Psr\Http\Client\ClientExceptionInterface
      */
-    public function throw(callable $callback = null)
+    public function throw(?callable $callback = null)
     {
         return parent::throw($callback ?? function (ResponseInterface $response, ?\Exception $e) use ($callback) {
             if ($this->json('error') !== 0) {

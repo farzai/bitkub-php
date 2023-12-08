@@ -55,7 +55,7 @@ abstract class AbstractResponseDecorator implements ResponseInterface
     /**
      * Return the json decoded response.
      */
-    public function json(string $key = null): mixed
+    public function json(?string $key = null): mixed
     {
         return $this->response->json($key);
     }
@@ -67,7 +67,7 @@ abstract class AbstractResponseDecorator implements ResponseInterface
      *
      * @throws \Psr\Http\Client\ClientExceptionInterface
      */
-    public function throw(callable $callback = null)
+    public function throw(?callable $callback = null)
     {
         return $this->response->throw($callback);
     }

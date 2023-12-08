@@ -10,9 +10,9 @@ $client = new Client(config: [
 ]);
 
 // Get my balance
-$response = $client->getBalances();
-// $response = $client->getWallet();
-// $response = $client->getOpenOrders('THB_BTC');
-// $response = $client->getUserLimits();
+$response = $client->balances()->throw();
+// $response = $client->wallet();
+// $response = $client->openOrders('THB_BTC');
+// $response = $client->userLimits();
 
-dd($response->json('result'));
+echo 'My BTC balance: '.$response->json('result.BTC.available').PHP_EOL;

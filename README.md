@@ -1,4 +1,4 @@
-# [WIP] Bitkub Wrapper - PHP (Unofficial)
+# Bitkub Wrapper - PHP (Unofficial)
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/farzai/bitkub.svg?style=flat-square)](https://packagist.org/packages/farzai/bitkub)
 [![Tests](https://img.shields.io/github/actions/workflow/status/farzai/bitkub-php/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/farzai/bitkub-php/actions/workflows/run-tests.yml)
@@ -16,7 +16,7 @@ We are not affiliated, associated, authorized, endorsed by, or in any way offici
 You can install the package via composer:
 
 ```bash
-composer require farzai/bitkub@dev-main
+composer require farzai/bitkub
 ```
 
 ## Usage
@@ -24,7 +24,49 @@ composer require farzai/bitkub@dev-main
 ```php
 use Farzai\Bitkub\Client;
 
-//
+$bitkub = new Client([
+    'api_key' => 'YOUR_API_KEY',
+    'secret' => 'YOUR_SECRET_KEY',
+]);
+
+// Basic usage
+
+// Get balances
+$myBTC = $bitkub->balances()
+    ->throw()
+    ->json('result.BTC.available');
+
+echo "My BTC balance: {$myBTC}";
+```
+
+
+Or you can manage your logic with `Response` object
+
+```php
+
+$response = $bitkub->balances();
+
+// Check response result
+if ($response->isSuccessful()) {
+    // @example
+    // [
+    //     "error" => 0,
+    //     "result" => [
+    //         "BTC" => [
+    //             "available" => 0,
+    //             "reserved" => 0,
+    //         ],
+    //         "ETH" => [//...],
+    //         "ADA" => [//...],
+    //     ],
+    // ]
+
+    // Get response data
+    $jsonData = $response->json(); // @return array
+
+    // Or
+    echo $response->json('result.BTC.available');
+}
 ```
 
 ## Testing

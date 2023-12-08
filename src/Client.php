@@ -2,6 +2,7 @@
 
 namespace Farzai\Bitkub;
 
+use Farzai\Bitkub\Exceptions\InvalidArgumentException;
 use Farzai\Bitkub\Responses\ResponseWithValidateErrorCode;
 use Farzai\Transport\Contracts\ResponseInterface;
 use Farzai\Transport\Request;
@@ -58,16 +59,14 @@ class Client
      */
     public function __construct(
         array $config = [],
-        PsrClientInterface $client = null,
-        LoggerInterface $logger = null
+        ?PsrClientInterface $client = null,
+        ?LoggerInterface $logger = null
     ) {
         $this->config = array_merge([
             'base_uri' => self::BASE_URI,
             'api_key' => '',
             'secret' => '',
         ], $config);
-
-        $this->ensureConfigIsValid();
 
         $builder = TransportBuilder::make();
         if ($client) {
@@ -81,7 +80,7 @@ class Client
         $this->transport = $builder->build();
     }
 
-    public function getStatus(): ResponseInterface
+    public function status(): ResponseInterface
     {
         return $this->get('/api/status');
     }
@@ -89,7 +88,7 @@ class Client
     /**
      * Get server timestamp.
      */
-    public function getServerTimestamp(): ResponseInterface
+    public function serverTimestamp(): ResponseInterface
     {
         $request = $this->createRequest('GET', '/api/v3/servertime');
 
@@ -99,17 +98,17 @@ class Client
         return new Response($request, $this->transport->sendRequest($request));
     }
 
-    public function getWallet(): ResponseInterface
+    public function wallet(): ResponseInterface
     {
         return $this->post('/api/v3/market/wallet');
     }
 
-    public function getBalances(): ResponseInterface
+    public function balances(): ResponseInterface
     {
         return $this->post('/api/v3/market/balances');
     }
 
-    public function getOpenOrders(string $sym): ResponseInterface
+    public function openOrders(string $sym): ResponseInterface
     {
         return $this->get('/api/v3/market/my-open-orders', [
             'query' => [
@@ -118,7 +117,7 @@ class Client
         ]);
     }
 
-    public function getUserLimits(): ResponseInterface
+    public function userLimits(): ResponseInterface
     {
         return $this->post('/api/v3/user/limits');
     }
@@ -180,6 +179,8 @@ class Client
      */
     protected function createRequest(string $method, string $path, array $options = []): PsrRequestInterface
     {
+        $this->ensureConfigIsValid();
+
         // Normalize path
         $path = '/'.trim($path, '/');
 
@@ -228,11 +229,11 @@ class Client
     private function ensureConfigIsValid(): void
     {
         if (empty($this->config['api_key'])) {
-            throw new \InvalidArgumentException('API key is required');
+            throw new InvalidArgumentException('API key is required');
         }
 
         if (empty($this->config['secret'])) {
-            throw new \InvalidArgumentException('Secret is required');
+            throw new InvalidArgumentException('Secret is required');
         }
     }
 }

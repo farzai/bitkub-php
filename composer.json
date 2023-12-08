@@ -15,7 +15,8 @@
     ],
     "require": {
         "php": "^8.1",
-        "farzai/transport": "dev-main"
+        "farzai/support": "^1.0",
+        "farzai/transport": "^1.0"
     },
     "require-dev": {
         "pestphp/pest": "^2.15",
@@ -34,7 +35,7 @@
     },
     "scripts": {
         "test": "vendor/bin/pest",
-            "test-coverage": "vendor/bin/pest --coverage",
+        "test-coverage": "vendor/bin/pest --coverage",
         "format": "vendor/bin/pint"
     },
     "config": {
