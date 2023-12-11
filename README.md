@@ -22,17 +22,17 @@ composer require farzai/bitkub
 ## Usage
 
 ```php
-use Farzai\Bitkub\Client;
+use Farzai\Bitkub\ClientBuilder;
 
-$bitkub = new Client([
-    'api_key' => 'YOUR_API_KEY',
-    'secret' => 'YOUR_SECRET_KEY',
-]);
+$bitkub = ClientBuilder::create()
+    ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET_KEY')
+    ->build();
 
 // Basic usage
+$market = $bitkub->market(); // Just call the market endpoint
 
 // Get balances
-$myBTC = $bitkub->balances()
+$myBTC = $market->balances()
     ->throw()
     ->json('result.BTC.available');
 
@@ -44,7 +44,9 @@ Or you can manage your logic with `Response` object
 
 ```php
 
-$response = $bitkub->balances();
+$market = $bitkub->market();
+
+$response = $market->balances();
 
 // Check response result
 if ($response->isSuccessful()) {

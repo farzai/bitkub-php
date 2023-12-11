@@ -2,7 +2,7 @@
 
 namespace Farzai\Bitkub\Responses;
 
-use Farzai\Bitkub\Constants\ErrorCodes;
+use Farzai\Bitkub\Exceptions\BitkubResponseErrorCodeException;
 use Farzai\Transport\Contracts\ResponseInterface;
 
 class ResponseWithValidateErrorCode extends AbstractResponseDecorator
@@ -17,7 +17,7 @@ class ResponseWithValidateErrorCode extends AbstractResponseDecorator
     {
         return parent::throw($callback ?? function (ResponseInterface $response, ?\Exception $e) use ($callback) {
             if ($this->json('error') !== 0) {
-                throw new \Exception(ErrorCodes::getDescription($this->json('error')));
+                throw new BitkubResponseErrorCodeException($response);
             }
 
             return $callback ? $callback($response, $e) : $response;

@@ -15,8 +15,8 @@
     ],
     "require": {
         "php": "^8.1",
-        "farzai/support": "^1.0",
-        "farzai/transport": "^1.0"
+        "farzai/support": "^1.1.1",
+        "farzai/transport": "dev-add-transport-options"
     },
     "require-dev": {
         "pestphp/pest": "^2.15",
