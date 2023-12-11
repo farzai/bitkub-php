@@ -223,4 +223,150 @@ class MarketEndpoint extends AbstractEndpoint
             ])
             ->send();
     }
+
+    // List all orders that have already matched.
+
+    // Query:
+    // sym string The symbol (e.g. btc_thb)
+    // p int Page (optional)
+    // lmt int Limit (optional)
+    // start int Start timestamp (optional)
+    // end int End timestamp (optional)
+
+    // {
+    //     "error": 0,
+    //     "result": [
+    //       {
+    //         "txn_id": "ETHBUY0000000197",
+    //         "order_id": "240",
+    //         "hash": "fwQ6dnQWQPs4cbaujNyejinS43a", // order hash
+    //         "parent_order_id": 0,
+    //         "super_order_id": 0,
+    //         "taken_by_me": false,
+    //         "is_maker": true,
+    //         "side": "buy",
+    //         "type": "limit",
+    //         "rate": "13335.57",
+    //         "fee": "0.34",
+    //         "credit": "0.34",
+    //         "amount": "0.00999987",
+    //         "ts": 1531513395
+    //       }
+    //     ],
+    //     "pagination": {
+    //         "page": 2,
+    //         "last": 3,
+    //         "next": 3,
+    //         "prev": 1
+    //     }
+    //   }
+    /**
+     * List all orders that have already matched.
+     *
+     * @param  array<{
+     *      sym: string,
+     *      p: int,
+     *      lmt: int,
+     *      start: int,
+     *      end: int,
+     * }> $params
+     *
+     * @response
+     * {
+     *      "error": 0,
+     *      "result": [
+     *          {
+     *              "txn_id": "ETHBUY0000000197",
+     *              "order_id": "240",
+     *              "hash": "fwQ6dnQWQPs4cbaujNyejinS43a", // order hash
+     *              "parent_order_id": 0,
+     *              "super_order_id": 0,
+     *              "taken_by_me": false,
+     *              "is_maker": true,
+     *              "side": "buy",
+     *              "type": "limit",
+     *              "rate": "13335.57",
+     *              "fee": "0.34",
+     *              "credit": "0.34",
+     *              "amount": "0.00999987",
+     *              "ts": 1531513395
+     *          }
+     *      ],
+     *      "pagination": {
+     *          "page": 2,
+     *          "last": 3,
+     *          "next": 3,
+     *          "prev": 1
+     *      }
+     * }
+     */
+    public function myOrderHistory(array $params): ResponseInterface
+    {
+        $config = $this->client->getConfig();
+
+        return $this->makeRequest('GET', '/api/v3/market/my-order-history')
+            ->acceptJson()
+            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withBody($params)
+            ->send();
+    }
+
+    // Get information regarding the specified order.
+
+    // Query:
+    // sym string The symbol (e.g. btc_thb)
+    // id string Order id
+    // sd string Order side: buy or sell
+    // hash string Lookup an order with order hash (optional). You don't need to specify sym, id, and sd when you specify order hash.
+    /**
+     * Get information regarding the specified order.
+     *
+     * @param  array<{
+     *      sym: string,
+     *      id: string,
+     *      sd: string,
+     *      hash: string,
+     * }> $params
+     *
+     * @response
+     * {
+     *      "error": 0,
+     *      "result": {
+     *          "id": "289", // order id
+     *          "first": "289", // first order id
+     *          "parent": "0", // parent order id
+     *          "last": "316", // last order id
+     *          "amount": 4000, // order amount
+     *          "rate": 291000, // order rate
+     *          "fee": 10, // order fee
+     *          "credit": 10, // order fee credit used
+     *          "filled": 3999.97, // filled amount
+     *          "total": 4000, // total amount
+     *          "status": "filled", // order status: filled, unfilled, canceled
+     *          "partial_filled": false, // true when order has been partially filled, false when not filled or fully filled
+     *          "remaining": 0, // remaining amount to be executed
+     *          "history": [
+     *              {
+     *                  "amount": 98.14848,
+     *                  "credit": 0.25,
+     *                  "fee": 0.25,
+     *                  "id": "289",
+     *                  "rate": 291000,
+     *                  "timestamp": 1525944169
+     *              },
+     *             // ...
+     *         ]
+     *    }
+     * }
+     */
+    public function myOrderInfo(array $params): ResponseInterface
+    {
+        $config = $this->client->getConfig();
+
+        return $this->makeRequest('GET', '/api/v3/market/order-info')
+            ->acceptJson()
+            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withBody($params)
+            ->send();
+    }
 }
