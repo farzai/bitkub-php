@@ -16,7 +16,7 @@ class ResponseWithValidateErrorCode extends AbstractResponseDecorator
     public function throw(?callable $callback = null)
     {
         return parent::throw($callback ?? function (ResponseInterface $response, ?\Exception $e) use ($callback) {
-            if ($this->json('error') !== 0) {
+            if ($this->json('error') !== null && $this->json('error') !== 0) {
                 throw new BitkubResponseErrorCodeException($response);
             }
 

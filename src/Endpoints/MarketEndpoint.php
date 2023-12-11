@@ -8,6 +8,208 @@ use Farzai\Transport\Contracts\ResponseInterface;
 class MarketEndpoint extends AbstractEndpoint
 {
     /**
+     * List all available symbols.
+     *
+     * @response
+     * {
+     *      "error": 0,
+     *      "result": [
+     *          {
+     *              "id": 1,
+     *              "symbol": "THB_BTC",
+     *              "info": "Thai Baht to Bitcoin"
+     *          },
+     *          {
+     *              "id": 2,
+     *              "symbol": "THB_ETH",
+     *              "info": "Thai Baht to Ethereum"
+     *          }
+     *      ]
+     * }
+     */
+    public function symbols(): ResponseInterface
+    {
+        return $this->makeRequest('GET', '/api/market/symbols')->send();
+    }
+
+    /**
+     * Get ticker information.
+     *
+     * @param  string  $symbol (optional) The symbol (e.g. btc_thb)
+     *
+     * @response
+     * {
+     *      "THB_BTC": {
+     *          "id": 1,
+     *          "last": 216415.00,
+     *          "lowestAsk": 216678.00,
+     *          "highestBid": 215000.00,
+     *          "percentChange": 1.91,
+     *          "baseVolume": 71.02603946,
+     *          "quoteVolume": 15302897.99,
+     *          "isFrozen": 0,
+     *          "high24hr": 221396.00,
+     *          "low24hr": 206414.00
+     *      },
+     *      "THB_ETH": {
+     *          "id": 2,
+     *          "last": 11878.00,
+     *          "lowestAsk": 12077.00,
+     *          "highestBid": 11893.00,
+     *          "percentChange": -0.49,
+     *          "baseVolume": 455.17839270,
+     *          "quoteVolume": 5505664.42,
+     *          "isFrozen": 0,
+     *          "high24hr": 12396.00,
+     *          "low24hr": 11645.00
+     *      }
+     * }
+     */
+    public function ticker(?string $symbol = null): ResponseInterface
+    {
+        return $this->makeRequest('GET', '/api/market/ticker')
+            ->withQuery(array_filter([
+                'sym' => $symbol,
+            ]))
+            ->send();
+    }
+
+    /**
+     * List recent trades.
+     *
+     * @param  array<{
+     *      sym: string,
+     *      lmt: int,
+     * }> $params
+     *
+     * @response
+     * {
+     *      "error": 0,
+     *      "result": [
+     *          [
+     *              1529516287, // timestamp
+     *              10000.00, // rate
+     *              0.09975000, // amount
+     *              "BUY" // side
+     *          ]
+     *      ]
+     * }
+     */
+    public function trades(array $params): ResponseInterface
+    {
+        return $this->makeRequest('GET', '/api/market/trades')
+            ->withQuery(array_filter($params))
+            ->send();
+    }
+
+    /**
+     * List open buy orders.
+     *
+     * sym string The symbol (e.g. thb_btc)
+     * lmt int No. of limit to query open buy orders
+     *
+     * @param  array<{
+     *     sym: string,
+     *    lmt: int,
+     * }> $params
+     *
+     * @response
+     * {
+     *      "error": 0,
+     *      "result": [
+     *          [
+     *              "1", // order id
+     *              1529453033, // timestamp
+     *              997.50, // volume
+     *              10000.00, // rate
+     *              0.09975000 // amount
+     *          ]
+     *      ]
+     * }
+     */
+    public function bids(array $params): ResponseInterface
+    {
+        return $this->makeRequest('GET', '/api/market/bids')
+            ->withQuery(array_filter($params))
+            ->send();
+    }
+
+    /**
+     * List open sell orders.
+     *
+     * sym string The symbol (e.g. thb_btc)
+     * lmt int No. of limit to query open sell orders
+     *
+     * @param  array<{
+     *      sym: string,
+     *      lmt: int,
+     * }> $params
+     *
+     * @response
+     * {
+     *      "error": 0,
+     *      "result": [
+     *          [
+     *              "680", // order id
+     *              1529491094, // timestamp
+     *              997.50, // volume
+     *              10000.00, // rate
+     *              0.09975000 // amount
+     *          ]
+     *      ]
+     * }
+     */
+    public function asks(array $params): ResponseInterface
+    {
+        return $this->makeRequest('GET', '/api/market/asks')
+            ->withQuery(array_filter($params))
+            ->send();
+    }
+
+    /**
+     * List all open orders.
+     *
+     * sym string The symbol (e.g. thb_btc)
+     * lmt int No. of limit to query open orders
+     *
+     * @param  array<{
+     *      sym: string,
+     *      lmt: int,
+     * }> $params
+     *
+     * @response
+     * {
+     *      "error": 0,
+     *      "result": {
+     *          "bids": [
+     *              [
+     *                  "1", // order id
+     *                  1529453033, // timestamp
+     *                  997.50, // volume
+     *                  10000.00, // rate
+     *                  0.09975000 // amount
+     *              ]
+     *          ],
+     *          "asks": [
+     *              [
+     *                  "680", // order id
+     *                  1529491094, // timestamp
+     *                  997.50, // volume
+     *                  10000.00, // rate
+     *                  0.09975000 // amount
+     *              ]
+     *          ]
+     *      }
+     * }
+     */
+    public function books(array $params): ResponseInterface
+    {
+        return $this->makeRequest('GET', '/api/market/books')
+            ->withQuery(array_filter($params))
+            ->send();
+    }
+
+    /**
      * Get user available balances
      *
      * @response
@@ -224,42 +426,6 @@ class MarketEndpoint extends AbstractEndpoint
             ->send();
     }
 
-    // List all orders that have already matched.
-
-    // Query:
-    // sym string The symbol (e.g. btc_thb)
-    // p int Page (optional)
-    // lmt int Limit (optional)
-    // start int Start timestamp (optional)
-    // end int End timestamp (optional)
-
-    // {
-    //     "error": 0,
-    //     "result": [
-    //       {
-    //         "txn_id": "ETHBUY0000000197",
-    //         "order_id": "240",
-    //         "hash": "fwQ6dnQWQPs4cbaujNyejinS43a", // order hash
-    //         "parent_order_id": 0,
-    //         "super_order_id": 0,
-    //         "taken_by_me": false,
-    //         "is_maker": true,
-    //         "side": "buy",
-    //         "type": "limit",
-    //         "rate": "13335.57",
-    //         "fee": "0.34",
-    //         "credit": "0.34",
-    //         "amount": "0.00999987",
-    //         "ts": 1531513395
-    //       }
-    //     ],
-    //     "pagination": {
-    //         "page": 2,
-    //         "last": 3,
-    //         "next": 3,
-    //         "prev": 1
-    //     }
-    //   }
     /**
      * List all orders that have already matched.
      *
@@ -305,21 +471,20 @@ class MarketEndpoint extends AbstractEndpoint
         $config = $this->client->getConfig();
 
         return $this->makeRequest('GET', '/api/v3/market/my-order-history')
+            ->withQuery(array_filter($params))
             ->acceptJson()
             ->withInterceptor(new GenerateSignatureV3($config))
-            ->withBody($params)
             ->send();
     }
 
-    // Get information regarding the specified order.
-
-    // Query:
-    // sym string The symbol (e.g. btc_thb)
-    // id string Order id
-    // sd string Order side: buy or sell
-    // hash string Lookup an order with order hash (optional). You don't need to specify sym, id, and sd when you specify order hash.
     /**
      * Get information regarding the specified order.
+     *
+     * Query:
+     * sym string The symbol (e.g. btc_thb)
+     * id string Order id
+     * sd string Order side: buy or sell
+     * hash string Lookup an order with order hash (optional). You don't need to specify sym, id, and sd when you specify order hash.
      *
      * @param  array<{
      *      sym: string,
@@ -364,9 +529,9 @@ class MarketEndpoint extends AbstractEndpoint
         $config = $this->client->getConfig();
 
         return $this->makeRequest('GET', '/api/v3/market/order-info')
+            ->withQuery(array_filter($params))
             ->acceptJson()
             ->withInterceptor(new GenerateSignatureV3($config))
-            ->withBody($params)
             ->send();
     }
 }

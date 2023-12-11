@@ -13,9 +13,12 @@ class SystemEndpoint extends AbstractEndpoint
 
     /**
      * Get server timestamp.
+     *
+     * @response
+     * 1701251212273
      */
     public function serverTimestamp(): ResponseInterface
     {
-        return $this->makeRequest('GET', '/api/servertime')->send();
+        return $this->makeRequest('GET', '/api/v3/servertime')->send();
     }
 }
