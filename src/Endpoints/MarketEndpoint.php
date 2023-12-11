@@ -36,7 +36,7 @@ class MarketEndpoint extends AbstractEndpoint
 
     /**
      * Create a buy order.
-     * 
+     *
      * sym string The symbol. Please note that the current endpoint requires the symbol thb_btc. However, it will be changed to btc_thb soon and you will need to update the configurations accordingly for uninterrupted API functionality.
      * amt float Amount you want to spend with no trailing zero (e.g. 1000.00 is invalid, 1000 is ok)
      * rat float Rate you want for the order with no trailing zero (e.g. 1000.00 is invalid, 1000 is ok)
@@ -81,13 +81,13 @@ class MarketEndpoint extends AbstractEndpoint
 
     /**
      * Create a sell order.
-     * 
+     *
      * sym string The symbol. Please note that the current endpoint requires the symbol thb_btc. However, it will be changed to btc_thb soon and you will need to update the configurations accordingly for uninterrupted API functionality.
      * amt float Amount you want to sell with no trailing zero (e.g. 0.10000000 is invalid, 0.1 is ok)
      * rat float Rate you want for the order with no trailing zero (e.g. 1000.00 is invalid, 1000 is ok)
      * typ string Order type: limit or market (for market order, please specify rat as 0)
      * client_id string your id for reference ( not required )
-     * 
+     *
      * @param array<{
      *      sym: string,
      *      amt: string,
@@ -95,7 +95,7 @@ class MarketEndpoint extends AbstractEndpoint
      *      typ: string,
      *      client_id: string,
      * }> $params
-     * 
+     *
      * @response
      * {
      *      "error": 0,
@@ -126,19 +126,19 @@ class MarketEndpoint extends AbstractEndpoint
 
     /**
      * Cancel an open order.
-     * 
+     *
      * sym string The symbol. Please note that the current endpoint requires the symbol thb_btc. However, it will be changed to btc_thb soon and you will need to update the configurations accordingly for uninterrupted API functionality.
      * id string Order id you wish to cancel
      * sd string Order side: buy or sell
      * hash string Cancel an order with order hash (optional). You don't need to specify sym, id, and sd when you specify order hash.
-     * 
+     *
      * @param array<{
      *      sym: string,
      *      id: string,
      *      sd: string,
      *      hash: string,
      * }> $params
-     * 
+     *
      * @response
      * {
      *     "error": 0
@@ -157,7 +157,7 @@ class MarketEndpoint extends AbstractEndpoint
 
     /**
      * Get balances info: this includes both available and reserved balances.
-     * 
+     *
      * @response
      * {
      *      "error": 0,
@@ -185,27 +185,27 @@ class MarketEndpoint extends AbstractEndpoint
     /**
      * List all open orders of the given symbol.
      * Note : The client_id of this API response is the input body field name client_id , was inputted by the user of APIs.
-     * 
-     * @param string $sym The symbol (e.g. btc_thb)
-     * 
+     *
+     * @param  string  $sym The symbol (e.g. btc_thb)
+     *
      * @response
      * {
      *      "error": 0,
      *      "result": [
      *          {
-    *               "id": "2", // order id
-    *               "hash": "fwQ6dnQWQPs4cbatFSJpMCcKTFR", // order hash
-    *               "side": "SELL", // order side
-    *               "type": "limit", // order type
-    *               "rate": 15000, // rate
-    *               "fee": 35.01, // fee
-    *               "credit": 35.01, // credit used
-    *               "amount": 0.93333334, // amount
-    *               "receive": 14000, // amount to receive
-    *               "parent_id": 1, // parent order id
-    *               "super_id": 1, // super parent order id
-    *               "client_id": "client_id" // client id
-    *               "ts": 1533834844 // timestamp
+     *               "id": "2", // order id
+     *               "hash": "fwQ6dnQWQPs4cbatFSJpMCcKTFR", // order hash
+     *               "side": "SELL", // order side
+     *               "type": "limit", // order type
+     *               "rate": 15000, // rate
+     *               "fee": 35.01, // fee
+     *               "credit": 35.01, // credit used
+     *               "amount": 0.93333334, // amount
+     *               "receive": 14000, // amount to receive
+     *               "parent_id": 1, // parent order id
+     *               "super_id": 1, // super parent order id
+     *               "client_id": "client_id" // client id
+     *               "ts": 1533834844 // timestamp
      *          }
      *          // ...
      *      ]
