@@ -48,6 +48,32 @@ echo "My BTC balance: {$myBTC}";
 
 ## Documentation
 
+- [Bitkub Wrapper - PHP (Unofficial)](#bitkub-wrapper---php-unofficial)
+  - [Installation](#installation)
+  - [Basic Usage](#basic-usage)
+  - [Documentation](#documentation)
+    - [Market](#market)
+      - [List all available symbols.](#list-all-available-symbols)
+      - [Get the ticker for a specific symbol.](#get-the-ticker-for-a-specific-symbol)
+      - [List recent trades.](#list-recent-trades)
+      - [List open buy orders.](#list-open-buy-orders)
+      - [List open sell orders.](#list-open-sell-orders)
+      - [List all open orders.](#list-all-open-orders)
+      - [Get user available balances](#get-user-available-balances)
+      - [Create a buy order.](#create-a-buy-order)
+      - [Create a sell order.](#create-a-sell-order)
+      - [Cancel an open order.](#cancel-an-open-order)
+      - [Get balances info: this includes both available and reserved balances.](#get-balances-info-this-includes-both-available-and-reserved-balances)
+      - [List all open orders of the given symbol.](#list-all-open-orders-of-the-given-symbol)
+      - [List all orders that have already matched.](#list-all-orders-that-have-already-matched)
+      - [Get information regarding the specified order.](#get-information-regarding-the-specified-order)
+  - [Testing](#testing)
+  - [Changelog](#changelog)
+  - [Contributing](#contributing)
+  - [Security Vulnerabilities](#security-vulnerabilities)
+  - [Credits](#credits)
+  - [License](#license)
+
 ### Market
 Call the market endpoint. 
 This will return an instance of `Farzai\Bitkub\Endpoints\MarketEndpoint` class.
@@ -74,7 +100,6 @@ $market->symbols();
 | sym | string | The symbol. |
 
 ```php
-# GET /api/market/ticker
 $market->ticker('THB_BTC');
 ```
 
@@ -202,6 +227,56 @@ $market->cancelOrder([
 - POST `/api/v3/market/balances`
 ```php
 $market->balances();
+```
+
+#### List all open orders of the given symbol.
+- GET `/api/v3/market/my-open-orders`
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| sym | string | The symbol. |
+```php
+$market->openOrders('THB_BTC');
+```
+
+#### List all orders that have already matched.
+- GET `/api/v3/market/my-order-history`
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| sym | string | The symbol. |
+| p | integer | The page number. |
+| lmt | integer | Limit the number of results. |
+| start | integer | The start timestamp. |
+| end | integer | The end timestamp. |
+
+```php
+$market->myOrderHistory([
+    'sym' => 'THB_BTC',
+    'p' => 1,
+    'lmt' => 10,
+    'start' => 1614556800,
+    'end' => 1614643199,
+]);
+```
+
+
+#### Get information regarding the specified order.
+- GET `/api/v3/market/order-info`
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| sym | string | The symbol. |
+| id | integer | The order ID. |
+| sd | string | The side of the order. |
+| hash | string | The hash of the order. |
+```php
+$market->myOrderInfo([
+    'sym' => 'THB_BTC',
+    'id' => 123456,
+    'sd' => 'buy',
+    'hash' => 'your_hash',
+]);
 ```
 
 ---
