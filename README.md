@@ -60,18 +60,14 @@ $market = $bitkub->market();
 ```
 
 #### List all available symbols.
-| Method | Endpoint |
-| --- | --- |
-| GET | /api/market/symbols |
+- GET `/api/market/symbols`
 
 ```php
 $market->symbols();
 ```
 
 #### Get the ticker for a specific symbol.
-| Method | Endpoint |
-| --- | --- |
-| GET | /api/market/ticker |
+- GET `/api/market/ticker`
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -83,9 +79,7 @@ $market->ticker('THB_BTC');
 ```
 
 #### List recent trades.
-| Method | Endpoint |
-| --- | --- |
-| GET | /api/market/trades |
+- GET `/api/market/trades`
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -99,9 +93,7 @@ $market->trades([
 ```
 
 #### List open buy orders.
-| Method | Endpoint |
-| --- | --- |
-| GET | /api/market/bids |
+- GET `/api/market/bids`
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -115,9 +107,7 @@ $market->bids([
 ```
 
 #### List open sell orders.
-| Method | Endpoint |
-| --- | --- |
-| GET | /api/market/asks |
+- GET `/api/market/asks`
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -131,9 +121,7 @@ $market->asks([
 ```
 
 #### List all open orders.
-| Method | Endpoint |
-| --- | --- |
-| GET | /api/market/books |
+- GET `/api/market/books`
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -147,17 +135,13 @@ $market->books([
 ```
 
 #### Get user available balances
-| Method | Endpoint |
-| --- | --- |
-| GET | /api/market/wallet |
+- GET `/api/market/wallet`
 ```php
 $market->wallet();
 ```
 
 #### Create a buy order.
-| Method | Endpoint |
-| --- | --- |
-| POST | /api/market/place-bid |
+- POST `/api/v3/market/place-bid`
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -177,9 +161,7 @@ $market->placeBid([
 ```
 
 #### Create a sell order.
-| Method | Endpoint |
-| --- | --- |
-| POST | /api/v3/market/place-ask |
+- POST `/api/v3/market/place-ask`
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -199,9 +181,7 @@ $market->placeAsk([
 ```
 
 #### Cancel an open order.
-| Method | Endpoint |
-| --- | --- |
-| POST | /api/v3/market/cancel-order |
+- POST `/api/v3/market/cancel-order`
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -219,9 +199,7 @@ $market->cancelOrder([
 ```
 
 #### Get balances info: this includes both available and reserved balances.
-| Method | Endpoint |
-| --- | --- |
-| POST | /api/v3/market/balances |
+- POST `/api/v3/market/balances`
 ```php
 $market->balances();
 ```
