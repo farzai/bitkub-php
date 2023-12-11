@@ -19,7 +19,7 @@ You can install the package via composer:
 composer require farzai/bitkub
 ```
 
-## Usage
+## Basic Usage
 
 ```php
 use Farzai\Bitkub\ClientBuilder;
@@ -32,44 +32,201 @@ $bitkub = ClientBuilder::create()
 $market = $bitkub->market(); // Just call the market endpoint
 
 // Get balances
-$myBTC = $market->balances()
-    ->throw()
-    ->json('result.BTC.available');
+$response = $market->balances();
+
+// (Optional) You may call the `throw()` method to ensure that the response is successful
+$response->throw();
+
+// Get response data
+$myBTC = $response->json('result.BTC.available');
 
 echo "My BTC balance: {$myBTC}";
 ```
 
+---
 
-Or you can manage your logic with `Response` object
+
+## Documentation
+
+### Market
+Call the market endpoint. 
+This will return an instance of `Farzai\Bitkub\Endpoints\MarketEndpoint` class.
 
 ```php
-
 $market = $bitkub->market();
 
-$response = $market->balances();
-
-// Check response result
-if ($response->isSuccessful()) {
-    // @example
-    // [
-    //     "error" => 0,
-    //     "result" => [
-    //         "BTC" => [
-    //             "available" => 0,
-    //             "reserved" => 0,
-    //         ],
-    //         "ETH" => [//...],
-    //         "ADA" => [//...],
-    //     ],
-    // ]
-
-    // Get response data
-    $jsonData = $response->json(); // @return array
-
-    // Or
-    echo $response->json('result.BTC.available');
-}
+# Next, We will use this instance for the following examples below.
+# ...
 ```
+
+#### List all available symbols.
+| Method | Endpoint |
+| --- | --- |
+| GET | /api/market/symbols |
+
+```php
+$market->symbols();
+```
+
+#### Get the ticker for a specific symbol.
+| Method | Endpoint |
+| --- | --- |
+| GET | /api/market/ticker |
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| sym | string | The symbol. |
+
+```php
+# GET /api/market/ticker
+$market->ticker('THB_BTC');
+```
+
+#### List recent trades.
+| Method | Endpoint |
+| --- | --- |
+| GET | /api/market/trades |
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| sym | string | The symbol. |
+| lmt | integer | Limit the number of results. |
+```php
+$market->trades([
+    'sym' => 'THB_BTC',
+    'lmt' => 10,
+]);
+```
+
+#### List open buy orders.
+| Method | Endpoint |
+| --- | --- |
+| GET | /api/market/bids |
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| sym | string | The symbol. |
+| lmt | integer | Limit the number of results. |
+```php
+$market->bids([
+    'sym' => 'THB_BTC',
+    'lmt' => 10,
+]);
+```
+
+#### List open sell orders.
+| Method | Endpoint |
+| --- | --- |
+| GET | /api/market/asks |
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| sym | string | The symbol. |
+| lmt | integer | Limit the number of results. |
+```php
+$market->asks([
+    'sym' => 'THB_BTC',
+    'lmt' => 10,
+]);
+```
+
+#### List all open orders.
+| Method | Endpoint |
+| --- | --- |
+| GET | /api/market/books |
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| sym | string | The symbol. |
+| lmt | integer | Limit the number of results. |
+```php
+$market->books([
+    'sym' => 'THB_BTC',
+    'lmt' => 10,
+]);
+```
+
+#### Get user available balances
+| Method | Endpoint |
+| --- | --- |
+| GET | /api/market/wallet |
+```php
+$market->wallet();
+```
+
+#### Create a buy order.
+| Method | Endpoint |
+| --- | --- |
+| POST | /api/market/place-bid |
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| sym | string | The symbol. Please note that the current endpoint requires the symbol thb_btc. However, it will be changed to btc_thb soon and you will need to update the configurations accordingly for uninterrupted API functionality. |
+| amt | float | Amount you want to spend with no trailing zero (e.g. 1000.00 is invalid, 1000 is ok) |
+| rat | float | Rate you want for the order with no trailing zero (e.g. 1000.00 is invalid, 1000 is ok) |
+| typ | string | Order type: limit or market (for market order, please specify rat as 0) |
+| client_id | string | your id for reference ( not required ) |
+```php
+$market->placeBid([
+    'sym' => 'THB_BTC',
+    'amt' => 1000,
+    'rat' => 1000000,
+    'typ' => 'limit',
+    'client_id' => 'your_id',
+]);
+```
+
+#### Create a sell order.
+| Method | Endpoint |
+| --- | --- |
+| POST | /api/v3/market/place-ask |
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| sym | string | The symbol. |
+| amt | float | Amount you want to spend with no trailing zero (e.g. 1000.00 is invalid, 1000 is ok) |
+| rat | float | Rate you want for the order with no trailing zero (e.g. 1000.00 is invalid, 1000 is ok) |
+| typ | string | Order type: limit or market (for market order, please specify rat as 0) |
+| client_id | string | your id for reference ( not required ) |
+```php
+$market->placeAsk([
+    'sym' => 'THB_BTC',
+    'amt' => 1000,
+    'rat' => 1000000,
+    'typ' => 'limit',
+    'client_id' => 'your_id',
+]);
+```
+
+#### Cancel an open order.
+| Method | Endpoint |
+| --- | --- |
+| POST | /api/v3/market/cancel-order |
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| sym | string | The symbol. |
+| id | integer | The order ID. |
+| sd | string | The side of the order. |
+| hash | string | The hash of the order. |
+```php
+$market->cancelOrder([
+    'sym' => 'THB_BTC',
+    'id' => 123456,
+    'sd' => 'buy',
+    'hash' => 'your_hash',
+]);
+```
+
+#### Get balances info: this includes both available and reserved balances.
+| Method | Endpoint |
+| --- | --- |
+| POST | /api/v3/market/balances |
+```php
+$market->balances();
+```
+
+---
 
 ## Testing
 

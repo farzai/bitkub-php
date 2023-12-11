@@ -239,7 +239,7 @@ class MarketEndpoint extends AbstractEndpoint
     /**
      * Create a buy order.
      *
-     * sym string The symbol. Please note that the current endpoint requires the symbol thb_btc. However, it will be changed to btc_thb soon and you will need to update the configurations accordingly for uninterrupted API functionality.
+     * sym string The symbol.
      * amt float Amount you want to spend with no trailing zero (e.g. 1000.00 is invalid, 1000 is ok)
      * rat float Rate you want for the order with no trailing zero (e.g. 1000.00 is invalid, 1000 is ok)
      * typ string Order type: limit or market (for market order, please specify rat as 0)
@@ -284,7 +284,7 @@ class MarketEndpoint extends AbstractEndpoint
     /**
      * Create a sell order.
      *
-     * sym string The symbol. Please note that the current endpoint requires the symbol thb_btc. However, it will be changed to btc_thb soon and you will need to update the configurations accordingly for uninterrupted API functionality.
+     * sym string The symbol.
      * amt float Amount you want to sell with no trailing zero (e.g. 0.10000000 is invalid, 0.1 is ok)
      * rat float Rate you want for the order with no trailing zero (e.g. 1000.00 is invalid, 1000 is ok)
      * typ string Order type: limit or market (for market order, please specify rat as 0)
@@ -329,7 +329,7 @@ class MarketEndpoint extends AbstractEndpoint
     /**
      * Cancel an open order.
      *
-     * sym string The symbol. Please note that the current endpoint requires the symbol thb_btc. However, it will be changed to btc_thb soon and you will need to update the configurations accordingly for uninterrupted API functionality.
+     * sym string The symbol.
      * id string Order id you wish to cancel
      * sd string Order side: buy or sell
      * hash string Cancel an order with order hash (optional). You don't need to specify sym, id, and sd when you specify order hash.
@@ -352,8 +352,8 @@ class MarketEndpoint extends AbstractEndpoint
 
         return $this->makeRequest('POST', '/api/v3/market/cancel-order')
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
             ->withBody($params)
+            ->withInterceptor(new GenerateSignatureV3($config))
             ->send();
     }
 
