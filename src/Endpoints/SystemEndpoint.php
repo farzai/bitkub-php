@@ -6,6 +6,23 @@ use Farzai\Transport\Contracts\ResponseInterface;
 
 class SystemEndpoint extends AbstractEndpoint
 {
+    /**
+     * Get server status.
+     *
+     * @response
+     * [
+     *      {
+     *          "name":"Non-secure endpoints",
+     *          "status":"ok",
+     *          "message":""
+     *      },
+     *      {
+     *          "name":"Secure endpoints",
+     *          "status":"ok",
+     *          "message":""
+     *      }
+     * ]
+     */
     public function status(): ResponseInterface
     {
         return $this->makeRequest('GET', '/api/status')->send();
@@ -15,7 +32,7 @@ class SystemEndpoint extends AbstractEndpoint
      * Get server timestamp.
      *
      * @response
-     * 1701251212273
+     * 1702793384662
      */
     public function serverTimestamp(): ResponseInterface
     {

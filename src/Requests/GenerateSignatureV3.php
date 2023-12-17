@@ -2,7 +2,9 @@
 
 namespace Farzai\Bitkub\Requests;
 
+use Farzai\Bitkub\Client;
 use Farzai\Bitkub\Contracts\RequestInterceptor;
+use Farzai\Bitkub\Utility;
 use Psr\Http\Message\RequestInterface as PsrRequestInterface;
 
 class GenerateSignatureV3 implements RequestInterceptor
@@ -14,17 +16,18 @@ class GenerateSignatureV3 implements RequestInterceptor
      */
     private array $config;
 
-    public function __construct(array $config)
+    /**
+     * The client instance.
+     */
+    private Client $client;
+
+    /**
+     * Create a new client instance.
+     */
+    public function __construct(array $config, Client $client)
     {
         $this->config = $config;
-    }
-
-    public function generate($timestamp, $method, $path, $query, $payload)
-    {
-        $message = sprintf('%s%s%s%s%s', $timestamp, $method, $path, $query, $payload);
-        $signature = hash_hmac('sha256', $message, $this->config['secret']);
-
-        return $signature;
+        $this->client = $client;
     }
 
     /**
@@ -32,7 +35,8 @@ class GenerateSignatureV3 implements RequestInterceptor
      */
     public function apply(PsrRequestInterface $request): PsrRequestInterface
     {
-        $timestamp = (int) (microtime(true) * 1000);
+        $timestamp = (int) Utility::getServerTimestamp($this->client)->format('U');
+
         $method = strtoupper($request->getMethod());
         $path = '/'.trim($request->getUri()->getPath(), '/');
         $payload = $request->getBody()->getContents() ?: '';
@@ -42,7 +46,7 @@ class GenerateSignatureV3 implements RequestInterceptor
             $query = '?'.$query;
         }
 
-        $signature = $this->generate($timestamp, $method, $path, $query, $payload);
+        $signature = Utility::generateSignature($this->config['secret'], $timestamp, $method, $path, $query, $payload);
 
         return $request->withHeader('X-BTK-APIKEY', $this->config['api_key'])
             ->withHeader('X-BTK-SIGN', $signature)

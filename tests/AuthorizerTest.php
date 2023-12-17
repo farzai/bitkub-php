@@ -1,22 +1,30 @@
 <?php
 
-use Farzai\Bitkub\Requests\GenerateSignatureV3;
+use Farzai\Bitkub\ClientBuilder;
+use Farzai\Bitkub\Tests\MockHttpClient;
+use Farzai\Bitkub\Utility;
 
 it('can generate signature success', function () {
-    $secret = 'test-secret';
+    $secret = 'secret';
     $timestamp = 1630483200000;
-
     $method = 'POST';
     $path = '/api/v3/market/balances';
     $query = '';
     $payload = '';
 
-    $authorizer = new GenerateSignatureV3([
-        'api_key' => 'test',
-        'secret' => $secret,
-    ]);
+    $psrClient = MockHttpClient::make()
+        ->addSequence(fn ($client) => $client->createResponse(200, (string) $timestamp));
 
-    $signature = $authorizer->generate($timestamp, $method, $path, $query, $payload);
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setHttpClient($psrClient)
+        ->build();
 
-    expect($signature)->toBe('b8403c345ce41b25b47885254fb8aeed9ad7ceb9e30425b86a9a151dd6ac2e35');
+    $timestamp = (int) Utility::getServerTimestamp($client)->format('U');
+
+    expect($timestamp)->toBe(1630483200000);
+
+    $signature = Utility::generateSignature($secret, $timestamp, $method, $path, $query, $payload);
+
+    expect($signature)->toBe('ae6fd3dc7d85ebea023e54292fa6eebaeea6dc02002433c51b57136eeb0a03e5');
 });

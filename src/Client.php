@@ -40,6 +40,26 @@ class Client implements ClientInterface
         $this->logger = $logger;
     }
 
+    public function market(): Endpoints\MarketEndpoint
+    {
+        return new Endpoints\MarketEndpoint($this);
+    }
+
+    public function crypto(): Endpoints\CryptoEndpoint
+    {
+        return new Endpoints\CryptoEndpoint($this);
+    }
+
+    public function user(): Endpoints\UserEndpoint
+    {
+        return new Endpoints\UserEndpoint($this);
+    }
+
+    public function system(): Endpoints\SystemEndpoint
+    {
+        return new Endpoints\SystemEndpoint($this);
+    }
+
     public function getTransport(): Transport
     {
         return $this->transport;
@@ -61,20 +81,5 @@ class Client implements ClientInterface
     public function sendRequest(PsrRequestInterface $request): PsrResponseInterface
     {
         return $this->transport->sendRequest($request);
-    }
-
-    public function market(): Endpoints\MarketEndpoint
-    {
-        return new Endpoints\MarketEndpoint($this);
-    }
-
-    public function system(): Endpoints\SystemEndpoint
-    {
-        return new Endpoints\SystemEndpoint($this);
-    }
-
-    public function user(): Endpoints\UserEndpoint
-    {
-        return new Endpoints\UserEndpoint($this);
     }
 }

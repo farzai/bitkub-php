@@ -22,7 +22,7 @@ class UserEndpoint extends AbstractEndpoint
 
         return $this->makeRequest('POST', '/api/v3/user/trading-credits')
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
     }
 
@@ -69,7 +69,7 @@ class UserEndpoint extends AbstractEndpoint
 
         return $this->makeRequest('POST', '/api/v3/user/limits')
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
     }
 }
