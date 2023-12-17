@@ -13,20 +13,20 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 class PendingRequest
 {
-    private ClientInterface $client;
+    public ClientInterface $client;
 
-    private string $method;
+    public string $method;
 
-    private string $path;
+    public string $path;
 
-    private array $options;
+    public array $options;
 
     /**
      * The request interceptors.
      *
      * @var array<\Farzai\Bitkub\Contracts\RequestInterceptor>
      */
-    private $interceptors = [];
+    public $interceptors = [];
 
     /**
      * Create a new pending request instance.
@@ -141,7 +141,7 @@ class PendingRequest
     /**
      * Create a new request instance.
      */
-    protected function createRequest(string $method, string $path, array $options = []): PsrRequestInterface
+    public function createRequest(string $method, string $path, array $options = []): PsrRequestInterface
     {
         // Normalize path
         $path = '/'.trim($path, '/');
@@ -170,7 +170,7 @@ class PendingRequest
     /**
      * Create a new response instance.
      */
-    protected function createResponse(PsrRequestInterface $request, PsrResponseInterface $baseResponse): ResponseInterface
+    public function createResponse(PsrRequestInterface $request, PsrResponseInterface $baseResponse): ResponseInterface
     {
         $response = new Response($request, $baseResponse);
         $response = new ResponseWithValidateErrorCode($response);

@@ -42,7 +42,7 @@ class CryptoEndpoint extends AbstractEndpoint
         return $this->makeRequest('GET', '/api/v3/crypto/addresses')
             ->withQuery(array_filter($params))
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
     }
 
@@ -89,7 +89,7 @@ class CryptoEndpoint extends AbstractEndpoint
 
         return $this->makeRequest('POST', '/api/v3/crypto/withdraw')
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->withBody($params)
             ->send();
     }
@@ -131,7 +131,7 @@ class CryptoEndpoint extends AbstractEndpoint
 
         return $this->makeRequest('POST', '/api/v3/crypto/internal-withdraw')
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->withBody($params)
             ->send();
     }
@@ -175,7 +175,7 @@ class CryptoEndpoint extends AbstractEndpoint
         return $this->makeRequest('POST', '/api/v3/crypto/deposit-history')
             ->withQuery(array_filter($params))
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
     }
 
@@ -218,7 +218,7 @@ class CryptoEndpoint extends AbstractEndpoint
         return $this->makeRequest('POST', '/api/v3/crypto/withdrawal-history')
             ->withQuery(array_filter($params))
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
     }
 
@@ -247,7 +247,7 @@ class CryptoEndpoint extends AbstractEndpoint
         return $this->makeRequest('POST', '/api/v3/crypto/generate-address')
             ->withQuery(['sym' => $symbol])
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
     }
 }

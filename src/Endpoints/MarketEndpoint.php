@@ -232,7 +232,7 @@ class MarketEndpoint extends AbstractEndpoint
 
         return $this->makeRequest('POST', '/api/v3/market/wallet')
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
     }
 
@@ -276,7 +276,7 @@ class MarketEndpoint extends AbstractEndpoint
 
         return $this->makeRequest('POST', '/api/v3/market/place-bid')
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->withBody($params)
             ->send();
     }
@@ -321,7 +321,7 @@ class MarketEndpoint extends AbstractEndpoint
 
         return $this->makeRequest('POST', '/api/v3/market/place-ask')
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->withBody($params)
             ->send();
     }
@@ -353,7 +353,7 @@ class MarketEndpoint extends AbstractEndpoint
         return $this->makeRequest('POST', '/api/v3/market/cancel-order')
             ->acceptJson()
             ->withBody($params)
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
     }
 
@@ -380,7 +380,7 @@ class MarketEndpoint extends AbstractEndpoint
 
         return $this->makeRequest('POST', '/api/v3/market/balances')
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
     }
 
@@ -419,7 +419,7 @@ class MarketEndpoint extends AbstractEndpoint
 
         return $this->makeRequest('GET', '/api/v3/market/my-open-orders')
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->withBody([
                 'sym' => $sym,
             ])
@@ -473,7 +473,7 @@ class MarketEndpoint extends AbstractEndpoint
         return $this->makeRequest('GET', '/api/v3/market/my-order-history')
             ->withQuery(array_filter($params))
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
     }
 
@@ -531,7 +531,7 @@ class MarketEndpoint extends AbstractEndpoint
         return $this->makeRequest('GET', '/api/v3/market/order-info')
             ->withQuery(array_filter($params))
             ->acceptJson()
-            ->withInterceptor(new GenerateSignatureV3($config))
+            ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
     }
 }
