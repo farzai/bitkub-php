@@ -13,10 +13,6 @@ $client = ClientBuilder::create()
 
 $websocket = new MarketEndpoint(new WebSocketClient($client));
 
-$websocket->listen('market.trade.thb_btc', function (Message $message) {
-    echo $message->json('sym').PHP_EOL;
-});
-
 $websocket->listen('trade.thb_ada', function (Message $message) {
     echo $message->json('sym').PHP_EOL;
 });

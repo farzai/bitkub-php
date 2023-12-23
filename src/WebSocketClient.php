@@ -3,11 +3,9 @@
 namespace Farzai\Bitkub;
 
 use Farzai\Bitkub\Contracts\ClientInterface;
-use Farzai\Transport\Transport;
-use Psr\Http\Message\RequestInterface as PsrRequestInterface;
 use Psr\Log\LoggerInterface;
 
-final class WebSocketClient implements ClientInterface
+final class WebSocketClient
 {
     private ClientInterface $client;
 
@@ -29,19 +27,9 @@ final class WebSocketClient implements ClientInterface
         return $this->client->getConfig();
     }
 
-    public function getTransport(): Transport
-    {
-        return $this->client->getTransport();
-    }
-
     public function getLogger(): LoggerInterface
     {
         return $this->client->getLogger();
-    }
-
-    public function sendRequest(PsrRequestInterface $request)
-    {
-        return $this->client->sendRequest($request);
     }
 
     /**
@@ -59,6 +47,11 @@ final class WebSocketClient implements ClientInterface
         $this->listeners[$event] = array_merge($this->listeners[$event], (array) $listener);
 
         return $this;
+    }
+
+    public function getListeners(): array
+    {
+        return $this->listeners;
     }
 
     public function run()
