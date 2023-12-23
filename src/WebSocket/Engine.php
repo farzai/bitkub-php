@@ -12,26 +12,14 @@ use WebSocket\Middleware as WebSocketMiddleware;
 
 class Engine implements WebSocketEngineInterface
 {
-    /**
-     * @var array<string, callable[]>
-     */
-    private array $listeners = [];
-
     public function __construct(
         private LoggerInterface $logger,
     ) {
     }
 
-    public function addListener(string $event, callable $listener)
+    public function handle(array $listeners): void
     {
-        $this->listeners[$event][] = $listener;
-
-        return $this;
-    }
-
-    public function run(): void
-    {
-        $events = array_unique(array_keys($this->listeners));
+        $events = array_unique(array_keys($listeners));
 
         $client = new WebSocketClient('wss://api.bitkub.com/websocket-api/'.implode(',', $events));
 
@@ -39,7 +27,7 @@ class Engine implements WebSocketEngineInterface
             ->addMiddleware(new WebSocketMiddleware\CloseHandler())
             ->addMiddleware(new WebSocketMiddleware\PingResponder());
 
-        $client->onText(function (WebSocketClient $client, WebSocketConnection $connection, WebSocketMessage $message) {
+        $client->onText(function (WebSocketClient $client, WebSocketConnection $connection, WebSocketMessage $message) use ($listeners) {
             $receivedAt = Carbon::now();
 
             $data = @json_decode($message->getContent(), true) ?? [];
@@ -50,7 +38,7 @@ class Engine implements WebSocketEngineInterface
             }
 
             $event = $data['stream'];
-            if (! isset($this->listeners[$event])) {
+            if (! isset($listeners[$event])) {
                 $this->logger->warning('[WebSocket] - '.Carbon::now()->format('Y-m-d H:i:s').' - Unknown event: '.$event);
 
                 return;
@@ -61,7 +49,7 @@ class Engine implements WebSocketEngineInterface
                 $receivedAt->toDateTimeImmutable(),
             );
 
-            foreach ($this->listeners[$event] as $listener) {
+            foreach ($listeners[$event] as $listener) {
                 $this->logger->info('[WebSocket] - '.Carbon::now()->format('Y-m-d H:i:s').' - Event: '.$event);
 
                 $listener($message);
