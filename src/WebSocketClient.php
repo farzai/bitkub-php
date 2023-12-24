@@ -3,6 +3,7 @@
 namespace Farzai\Bitkub;
 
 use Farzai\Bitkub\Contracts\ClientInterface;
+use Farzai\Bitkub\Contracts\WebSocketEngineInterface;
 use Psr\Log\LoggerInterface;
 
 class WebSocketClient
@@ -16,10 +17,12 @@ class WebSocketClient
      */
     private array $listeners = [];
 
-    public function __construct(ClientInterface $client)
-    {
+    public function __construct(
+        ClientInterface $client,
+        ?WebSocketEngineInterface $websocket = null
+    ) {
         $this->client = $client;
-        $this->websocket = new WebSocket\Engine($this->getLogger());
+        $this->websocket = $websocket ?: new WebSocket\Engine($this->getLogger());
     }
 
     public function getConfig(): array

@@ -19,11 +19,11 @@ class Engine implements WebSocketEngineInterface
 
     public function handle(array $listeners): void
     {
-        $events = array_unique(array_keys($listeners));
+        $events = $this->getEventNames($listeners);
 
-        $this->logger->info('[WebSocket] - '.Carbon::now()->format('Y-m-d H:i:s').' - Connecting to WebSocket server...');
+        $this->logger->info('[WebSocket] - Connecting to WebSocket server...');
 
-        $this->logger->debug('[WebSocket] - '.Carbon::now()->format('Y-m-d H:i:s').' - Events: '.implode(', ', $events));
+        $this->logger->debug('[WebSocket] - Events: '.implode(', ', $events));
 
         $client = new WebSocketClient('wss://api.bitkub.com/websocket-api/'.implode(',', $events));
 
@@ -36,14 +36,14 @@ class Engine implements WebSocketEngineInterface
 
             $data = @json_decode($message->getContent(), true) ?? [];
             if (! isset($data['stream'])) {
-                $this->logger->warning('[WebSocket] - '.Carbon::now()->format('Y-m-d H:i:s').' - Unknown data: '.$message->getContent());
+                $this->logger->warning('[WebSocket] - Unknown data: '.$message->getContent());
 
                 return;
             }
 
             $event = $data['stream'];
             if (! isset($listeners[$event])) {
-                $this->logger->warning('[WebSocket] - '.Carbon::now()->format('Y-m-d H:i:s').' - Unknown event: '.$event);
+                $this->logger->warning('[WebSocket] - Unknown event: '.$event);
 
                 return;
             }
@@ -54,16 +54,21 @@ class Engine implements WebSocketEngineInterface
             );
 
             foreach ($listeners[$event] as $listener) {
-                $this->logger->info('[WebSocket] - '.Carbon::now()->format('Y-m-d H:i:s').' - Event: '.$event);
+                $this->logger->info('[WebSocket] - Event: '.$event);
 
                 $listener($message);
             }
         });
 
         $client->onClose(function () {
-            $this->logger->info('[WebSocket] - '.Carbon::now()->format('Y-m-d H:i:s').' - Connection closed.');
+            $this->logger->info('[WebSocket] - Connection closed.');
         });
 
         $client->start();
+    }
+
+    private function getEventNames(array $listeners): array
+    {
+        return array_unique(array_keys($listeners));
     }
 }

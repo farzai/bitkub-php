@@ -62,7 +62,7 @@ class Message implements \JsonSerializable, ArrayAccess
 
     public function offsetGet($offset): mixed
     {
-        return $this->jsonDecoded[$offset];
+        return Arr::get($this->jsonDecoded, $offset);
     }
 
     public function offsetSet($offset, $value): void
@@ -77,7 +77,7 @@ class Message implements \JsonSerializable, ArrayAccess
 
     public function __get($name)
     {
-        return $this->jsonDecoded[$name] ?? null;
+        return Arr::get($this->jsonDecoded, $name, null);
     }
 
     public function __isset($name): bool

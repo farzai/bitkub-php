@@ -85,6 +85,20 @@ it('should call run on endpoint success', function () {
     $endpoint->run();
 });
 
+it('should call handle on client success', function () {
+    $engine = $this->createMock(\Farzai\Bitkub\Contracts\WebSocketEngineInterface::class);
+    $engine->expects($this->once())->method('handle');
+
+    $client = new WebSocketClient(
+        ClientBuilder::create()
+            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
+            ->build(),
+        $engine,
+    );
+
+    $client->run();
+});
+
 it('should create new instance of market endpoint', function () {
     $client = new WebSocketClient(
         ClientBuilder::create()

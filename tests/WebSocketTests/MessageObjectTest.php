@@ -35,8 +35,26 @@ it('should return message object', function () {
 
     expect($message->pairing_id)->toBe(1);
     expect($message->event)->toBe('bidschanged');
+    expect($message['event'])->toBe('bidschanged');
 
     expect($message->json('data.0.0'))->toBe(121.82);
+
+    // Test setter
+    $message->event = 'askschanged';
+    expect($message->event)->toBe('askschanged');
+
+    $message['event'] = 'askschanged';
+    expect($message->event)->toBe('askschanged');
+
+    // Test unset
+    expect(isset($message->event))->toBeTrue();
+
+    unset($message->event);
+    expect($message->event)->toBeNull();
+    expect(isset($message->event))->toBeFalse();
+
+    unset($message['pairing_id']);
+    expect($message->pairing_id)->toBeNull();
 });
 
 it('should return null if json is not valid', function () {
