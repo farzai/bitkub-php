@@ -5,7 +5,7 @@ namespace Farzai\Bitkub;
 use Farzai\Bitkub\Contracts\ClientInterface;
 use Psr\Log\LoggerInterface;
 
-final class WebSocketClient
+class WebSocketClient
 {
     private ClientInterface $client;
 

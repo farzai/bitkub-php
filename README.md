@@ -57,13 +57,13 @@ $websocket = new \Farzai\Bitkub\WebSocket\Endpoints\MarketEndpoint(
 
 $websocket->listen('trade.thb_ada', function (\Farzai\Bitkub\WebSocket\Message $message) {
     // Do something
-    echo $message->json('sym').PHP_EOL;
+    echo $message->sym.PHP_EOL;
 });
 
 // Or you can use multiple symbols like this
 $websocket->listen(['trade.thb_ada', 'trade.thb_btc', function (\Farzai\Bitkub\WebSocket\Message $message) {
     // Do something
-    echo $message->json('sym').PHP_EOL;
+    echo $message->sym.PHP_EOL;
 });
 
 $websocket->run();
