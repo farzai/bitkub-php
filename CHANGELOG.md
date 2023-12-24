@@ -2,6 +2,14 @@
 
 All notable changes to `bitkub` will be documented in this file.
 
+## 1.1.0 - 2023-12-24
+
+### What's Changed
+
+* Add Websocket feature by @parsilver in https://github.com/farzai/bitkub-php/pull/3
+
+**Full Changelog**: https://github.com/farzai/bitkub-php/compare/1.0.1...1.1.0
+
 ## 1.0.1 - 2023-12-17
 
 ### What's Changed
