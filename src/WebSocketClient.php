@@ -32,6 +32,11 @@ final class WebSocketClient
         return $this->client->getLogger();
     }
 
+    public function getClient(): ClientInterface
+    {
+        return $this->client;
+    }
+
     /**
      * Add event listener.
      *

@@ -2,18 +2,15 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-use Farzai\Bitkub\ClientBuilder;
-use Farzai\Bitkub\WebSocket\Endpoints\MarketEndpoint;
-use Farzai\Bitkub\WebSocket\Message;
-use Farzai\Bitkub\WebSocketClient;
+$websocket = new \Farzai\Bitkub\WebSocket\Endpoints\MarketEndpoint(
+    new \Farzai\Bitkub\WebSocketClient(
+        \Farzai\Bitkub\ClientBuilder::create()
+            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
+            ->build()
+    )
+);
 
-$client = ClientBuilder::create()
-    ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-    ->build();
-
-$websocket = new MarketEndpoint(new WebSocketClient($client));
-
-$websocket->listen('trade.thb_ada', function (Message $message) {
+$websocket->listen('trade.thb_ada', function (Farzai\Bitkub\WebSocket\Message $message) {
     echo $message->json('sym').PHP_EOL;
 });
 

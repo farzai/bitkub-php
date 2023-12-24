@@ -20,4 +20,9 @@ abstract class AbstractEndpoint
     {
         $this->websocket->run();
     }
+
+    protected function getLogger()
+    {
+        return $this->websocket->getLogger();
+    }
 }

@@ -21,6 +21,10 @@ class Engine implements WebSocketEngineInterface
     {
         $events = array_unique(array_keys($listeners));
 
+        $this->logger->info('[WebSocket] - '.Carbon::now()->format('Y-m-d H:i:s').' - Connecting to WebSocket server...');
+
+        $this->logger->debug('[WebSocket] - '.Carbon::now()->format('Y-m-d H:i:s').' - Events: '.implode(', ', $events));
+
         $client = new WebSocketClient('wss://api.bitkub.com/websocket-api/'.implode(',', $events));
 
         $client
@@ -54,6 +58,10 @@ class Engine implements WebSocketEngineInterface
 
                 $listener($message);
             }
+        });
+
+        $client->onClose(function () {
+            $this->logger->info('[WebSocket] - '.Carbon::now()->format('Y-m-d H:i:s').' - Connection closed.');
         });
 
         $client->start();

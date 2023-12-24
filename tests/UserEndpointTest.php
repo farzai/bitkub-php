@@ -73,7 +73,7 @@ it('can call userLimits success', function () {
         ->setHttpClient($psrClient)
         ->build();
 
-    $response = $client->user()->userLimits()->throw();
+    $response = $client->user()->limits()->throw();
 
     expect($response->json('result'))->toBe([
         'limits' => [

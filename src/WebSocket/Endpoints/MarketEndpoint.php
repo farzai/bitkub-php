@@ -22,6 +22,8 @@ class MarketEndpoint extends AbstractEndpoint
             $streamNames = $streamName;
         }
 
+        $this->getLogger()->debug('Add event listener for stream: '.implode(', ', $streamNames));
+
         foreach ($streamNames as $name) {
             $this->websocket->addListener($this->getStreamName($name), $listeners);
         }

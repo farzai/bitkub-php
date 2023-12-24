@@ -63,7 +63,7 @@ class UserEndpoint extends AbstractEndpoint
      *      }
      * }
      */
-    public function userLimits(): ResponseInterface
+    public function limits(): ResponseInterface
     {
         $config = $this->client->getConfig();
 
