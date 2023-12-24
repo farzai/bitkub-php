@@ -2,14 +2,14 @@
 
 namespace Farzai\Bitkub\Endpoints;
 
-use Farzai\Bitkub\Client;
+use Farzai\Bitkub\Contracts\ClientInterface;
 use Farzai\Bitkub\Requests\PendingRequest;
 
 abstract class AbstractEndpoint
 {
-    protected Client $client;
+    protected ClientInterface $client;
 
-    public function __construct(Client $client)
+    public function __construct(ClientInterface $client)
     {
         $this->client = $client;
     }

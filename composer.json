@@ -16,7 +16,8 @@
     "require": {
         "php": "^8.1",
         "farzai/support": "^1.2",
-        "farzai/transport": "^1.2"
+        "farzai/transport": "^1.2",
+        "phrity/websocket": "^2.0"
     },
     "require-dev": {
         "pestphp/pest": "^2.15",

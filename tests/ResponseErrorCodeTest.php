@@ -1,5 +1,6 @@
 <?php
 
+use Farzai\Bitkub\Constants\ErrorCodes;
 use Farzai\Bitkub\Exceptions\BitkubResponseErrorCodeException;
 use Farzai\Bitkub\Responses\ResponseWithValidateErrorCode;
 use Farzai\Bitkub\Tests\MockHttpClient;
@@ -57,3 +58,23 @@ it('should not throw exception when error code is 0', function () {
 
     expect($response->json('error'))->toBe(0);
 });
+
+it('should valid response if response without farzai response', function () {
+    $psrResponse = MockHttpClient::response(200, json_encode([
+        'error' => ErrorCodes::MISSING_TIMESTAMP,
+    ]));
+
+    $exception = new BitkubResponseErrorCodeException($psrResponse);
+
+    expect($exception->getCode())->toBe(ErrorCodes::MISSING_TIMESTAMP);
+    expect($exception->getMessage())->toBe('Missing timestamp');
+    expect($exception->getResponse())->toBe($psrResponse);
+});
+
+it('should be error code not found', function () {
+    $psrResponse = MockHttpClient::response(200, json_encode([
+        // Empty error code
+    ]));
+
+    new BitkubResponseErrorCodeException($psrResponse);
+})->throws(\Exception::class, 'Error code not found.');
