@@ -269,9 +269,6 @@ $market->balances();
 #### List all open orders of the given symbol.
 - GET `/api/v3/market/my-open-orders`
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| sym | string | The symbol. |
 ```php
 $market->openOrders(
     // string: The symbol.
