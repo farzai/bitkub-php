@@ -2,8 +2,6 @@
 
 namespace Farzai\Bitkub;
 
-use DateTimeImmutable;
-
 class Utility
 {
     /**
@@ -15,17 +13,5 @@ class Utility
         $signature = hash_hmac('sha256', $message, $secret);
 
         return $signature;
-    }
-
-    /**
-     * Get server timestamp.
-     */
-    public static function getServerTimestamp(Client $client): DateTimeImmutable
-    {
-        $timestamp = (int) $client->system()
-            ->serverTimestamp()
-            ->throw()->body();
-
-        return \DateTimeImmutable::createFromFormat('U', $timestamp);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use Farzai\Bitkub\ClientBuilder;
+use Farzai\Bitkub\Endpoints\SystemEndpoint;
 use Farzai\Bitkub\Tests\MockHttpClient;
 use Farzai\Bitkub\Utility;
 
@@ -20,7 +21,9 @@ it('can generate signature success', function () {
         ->setHttpClient($psrClient)
         ->build();
 
-    $timestamp = (int) Utility::getServerTimestamp($client)->format('U');
+    $endpoint = new SystemEndpoint($client);
+
+    $timestamp = (int) $endpoint->serverTimestamp()->throw()->body();
 
     expect($timestamp)->toBe(1630483200000);
 

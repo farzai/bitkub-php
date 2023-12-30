@@ -11,36 +11,49 @@ class MarketEndpoint extends AbstractEndpoint
      *    echo $message->json('sym').PHP_EOL;
      * });
      *
-     * @param  string[]|string  $streamName
+     * @param  string[]|string  $streamNames
      * @param  callable|array<callable>  $listeners
      */
-    public function listen($streamName, $listeners)
+    public function listen($streamNames, $listeners)
     {
-        if (is_string($streamName)) {
-            $streamNames = array_map('trim', explode(',', $streamName));
-        } else {
-            $streamNames = $streamName;
-        }
+        $streamNames = $this->normalizeStreamNames($streamNames);
 
         $this->getLogger()->debug('Add event listener for stream: '.implode(', ', $streamNames));
 
         foreach ($streamNames as $name) {
-            $this->websocket->addListener($this->getStreamName($name), $listeners);
+            $this->websocket->addListener($name, $listeners);
         }
 
         return $this;
     }
 
-    private function getStreamName(string $streamName): string
+    /**
+     * Normalize stream names.
+     *
+     * @param  string[]|string  $streamNames
+     */
+    private function normalizeStreamNames($streamNames): array
     {
-        $segments = explode('.', $streamName);
-
-        if (count($segments) === 3) {
-            return $streamName;
+        if (is_string($streamNames)) {
+            $streamNames = explode(',', $streamNames);
         }
 
-        if (count($segments) === 2) {
-            return 'market.'.$streamName;
+        $streamNames = array_filter(array_map('trim', $streamNames), function ($streamName) {
+            return ! empty($streamName);
+        });
+
+        $streamNames = array_map(fn ($streamName) => $this->getStreamName($streamName), $streamNames);
+
+        return $streamNames;
+    }
+
+    private function getStreamName(string $streamName): string
+    {
+        $streamName = 'market.'.preg_replace('/^market\./', '', $streamName);
+
+        // Validate stream name format.
+        if (substr_count($streamName, '.') === 2) {
+            return $streamName;
         }
 
         throw new \InvalidArgumentException('Invalid stream name format. Given: '.$streamName);

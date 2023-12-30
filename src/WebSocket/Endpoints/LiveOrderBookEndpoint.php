@@ -10,7 +10,7 @@ class LiveOrderBookEndpoint extends AbstractEndpoint
      * Add event listener.
      *
      * @example $websocket->listen('thb_btc', function (Message $message) {
-     *    echo $message->json('sym').PHP_EOL;
+     *    echo $message->json('sym');
      * });
      *
      * @param  string|int  $symbol Symbol name or id.

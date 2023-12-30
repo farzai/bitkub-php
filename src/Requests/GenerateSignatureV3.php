@@ -2,8 +2,9 @@
 
 namespace Farzai\Bitkub\Requests;
 
-use Farzai\Bitkub\Client;
+use Farzai\Bitkub\Contracts\ClientInterface;
 use Farzai\Bitkub\Contracts\RequestInterceptor;
+use Farzai\Bitkub\Endpoints\SystemEndpoint;
 use Farzai\Bitkub\Utility;
 use Psr\Http\Message\RequestInterface as PsrRequestInterface;
 
@@ -19,12 +20,12 @@ class GenerateSignatureV3 implements RequestInterceptor
     /**
      * The client instance.
      */
-    private Client $client;
+    private ClientInterface $client;
 
     /**
      * Create a new client instance.
      */
-    public function __construct(array $config, Client $client)
+    public function __construct(array $config, ClientInterface $client)
     {
         $this->config = $config;
         $this->client = $client;
@@ -35,7 +36,9 @@ class GenerateSignatureV3 implements RequestInterceptor
      */
     public function apply(PsrRequestInterface $request): PsrRequestInterface
     {
-        $timestamp = (int) Utility::getServerTimestamp($this->client)->format('U');
+        $endpoint = new SystemEndpoint($this->client);
+
+        $timestamp = (int) $endpoint->serverTimestamp()->throw()->body();
 
         $method = strtoupper($request->getMethod());
         $path = '/'.trim($request->getUri()->getPath(), '/');
