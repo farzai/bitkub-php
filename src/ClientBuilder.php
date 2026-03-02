@@ -41,7 +41,7 @@ final class ClientBuilder
      */
     public static function create()
     {
-        return new self();
+        return new self;
     }
 
     /**
@@ -98,17 +98,17 @@ final class ClientBuilder
     {
         $this->ensureConfigIsValid();
 
-        $logger = $this->logger ?? new NullLogger();
+        $logger = $this->logger ?? new NullLogger;
 
-        $builder = TransportBuilder::make();
+        $builder = TransportBuilder::make()
+            ->withBaseUri(sprintf('https://%s', self::DEFAULT_HOST))
+            ->setLogger($logger);
+
         if ($this->httpClient) {
-            $builder->setClient($this->httpClient);
+            $builder = $builder->setClient($this->httpClient);
         }
 
-        $builder->setLogger($logger);
-
         $transport = $builder->build();
-        $transport->setUri(sprintf('https://%s', self::DEFAULT_HOST));
 
         $client = new Client(
             config: $this->config,
@@ -130,8 +130,5 @@ final class ClientBuilder
         }
     }
 
-    final public function __construct()
-    {
-
-    }
+    final public function __construct() {}
 }

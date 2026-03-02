@@ -13,7 +13,7 @@ class LiveOrderBookEndpoint extends AbstractEndpoint
      *    echo $message->json('sym');
      * });
      *
-     * @param  string|int  $symbol Symbol name or id.
+     * @param  string|int  $symbol  Symbol name or id.
      * @param  callable|array<callable>  $listeners
      */
     public function listen($symbol, $listeners)

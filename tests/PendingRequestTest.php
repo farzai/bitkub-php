@@ -149,3 +149,62 @@ it('it can createRequest success', function () {
     expect($request->getUri()->getQuery())->toBe('symbol=BTC');
     expect($request->getHeaderLine('Content-Type'))->toBe('application/json');
 });
+
+it('can createRequest with string body', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $pending = new PendingRequest($client, 'POST', '/api/market/orders');
+
+    $request = $pending->createRequest('POST', '/api/market/orders', [
+        'body' => 'raw-string-body',
+    ]);
+
+    expect($request)->toBeInstanceOf(\Psr\Http\Message\RequestInterface::class);
+    expect($request->getBody()->getContents())->toBe('raw-string-body');
+});
+
+it('can createRequest without optional parameters', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $pending = new PendingRequest($client, 'GET', '/api/market/ticker');
+
+    $request = $pending->createRequest('GET', '/api/market/ticker');
+
+    expect($request)->toBeInstanceOf(\Psr\Http\Message\RequestInterface::class);
+    expect($request->getMethod())->toBe('GET');
+    expect($request->getUri()->getPath())->toBe('/api/market/ticker');
+    expect($request->getUri()->getQuery())->toBe('');
+});
+
+it('normalizes path with leading slash', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $pending = new PendingRequest($client, 'GET', 'api/market/ticker');
+
+    $request = $pending->createRequest('GET', 'api/market/ticker');
+
+    expect($request->getUri()->getPath())->toBe('/api/market/ticker');
+});
+
+it('can createResponse wrapping PSR response', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $pending = new PendingRequest($client, 'GET', '/api/market/ticker');
+
+    $psrRequest = $this->createMock(\Psr\Http\Message\RequestInterface::class);
+    $psrResponse = \Farzai\Bitkub\Tests\MockHttpClient::response(200, json_encode(['error' => 0]));
+
+    $response = $pending->createResponse($psrRequest, $psrResponse);
+
+    expect($response)->toBeInstanceOf(\Farzai\Transport\Contracts\ResponseInterface::class);
+    expect($response)->toBeInstanceOf(\Farzai\Bitkub\Responses\ResponseWithValidateErrorCode::class);
+    expect($response->statusCode())->toBe(200);
+});

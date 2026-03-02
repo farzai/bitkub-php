@@ -35,7 +35,7 @@ class MarketEndpoint extends AbstractEndpoint
     /**
      * Get ticker information.
      *
-     * @param  string  $symbol (optional) The symbol (e.g. btc_thb)
+     * @param  string  $symbol  (optional) The symbol (e.g. btc_thb)
      *
      * @response
      * {
@@ -388,7 +388,7 @@ class MarketEndpoint extends AbstractEndpoint
      * List all open orders of the given symbol.
      * Note : The client_id of this API response is the input body field name client_id , was inputted by the user of APIs.
      *
-     * @param  string  $sym The symbol (e.g. btc_thb)
+     * @param  string  $sym  The symbol (e.g. btc_thb)
      *
      * @response
      * {

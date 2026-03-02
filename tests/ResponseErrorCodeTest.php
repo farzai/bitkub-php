@@ -27,7 +27,7 @@ it('decorator must be instance of ResponseInterface', function () {
     expect($response->headers())->toBe([
         'Content-Type' => 'application/json',
     ]);
-    expect($response->isSuccessfull())->toBeTrue();
+    expect($response->isSuccessful())->toBeTrue();
     expect($response->json('error'))->toBe(0);
     expect($response->getPsrRequest())->toBe($psrRequest);
 });
@@ -78,3 +78,78 @@ it('should be error code not found', function () {
 
     new BitkubResponseErrorCodeException($psrResponse);
 })->throws(\Exception::class, 'Error code not found.');
+
+it('should not throw exception when error code is null', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode([
+        'result' => 'ok',
+    ]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    $result = $response->throw();
+
+    expect($result)->toBeInstanceOf(ResponseWithValidateErrorCode::class);
+});
+
+it('throw returns static for chaining', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode([
+        'error' => 0,
+    ]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    $result = $response->throw();
+
+    expect($result)->toBe($response);
+});
+
+it('decorator delegates jsonOrNull method', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode([
+        'error' => 0,
+        'result' => ['balance' => 100],
+    ]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    expect($response->jsonOrNull('result'))->toBe(['balance' => 100]);
+    expect($response->jsonOrNull('nonexistent'))->toBeNull();
+});
+
+it('decorator delegates toArray method', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode([
+        'error' => 0,
+        'result' => 'ok',
+    ]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    expect($response->toArray())->toBe(['error' => 0, 'result' => 'ok']);
+});
+
+it('decorator delegates PSR-7 getStatusCode', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(201, json_encode(['error' => 0]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    expect($response->getStatusCode())->toBe(201);
+});
+
+it('decorator delegates PSR-7 getBody', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode(['error' => 0]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    expect($response->getBody())->toBeInstanceOf(\Psr\Http\Message\StreamInterface::class);
+});
