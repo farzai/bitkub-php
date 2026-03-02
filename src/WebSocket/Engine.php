@@ -14,8 +14,7 @@ class Engine implements WebSocketEngineInterface
 {
     public function __construct(
         private LoggerInterface $logger,
-    ) {
-    }
+    ) {}
 
     public function handle(array $listeners): void
     {
@@ -28,8 +27,8 @@ class Engine implements WebSocketEngineInterface
         $client = new WebSocketClient('wss://api.bitkub.com/websocket-api/'.implode(',', $events));
 
         $client
-            ->addMiddleware(new WebSocketMiddleware\CloseHandler())
-            ->addMiddleware(new WebSocketMiddleware\PingResponder());
+            ->addMiddleware(new WebSocketMiddleware\CloseHandler)
+            ->addMiddleware(new WebSocketMiddleware\PingResponder);
 
         $client->onText(function (WebSocketClient $client, WebSocketConnection $connection, WebSocketMessage $message) use ($listeners) {
             $receivedAt = Carbon::now();
