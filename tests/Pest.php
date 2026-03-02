@@ -1,7 +1,6 @@
 <?php
 
+declare(strict_types=1);
+
 uses()
-    ->beforeEach(function () {
-        \Farzai\Bitkub\Requests\GenerateSignatureV3::resetTimestampCache();
-    })
     ->in(__DIR__);

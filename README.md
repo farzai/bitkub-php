@@ -8,6 +8,8 @@
 Simplify the integration of the Bitkub API into your PHP application.
 [Bitkub API Documentation](https://github.com/bitkub/bitkub-official-api-docs/blob/master/restful-api.md)
 
+**Requirements:** PHP 8.2+
+
 **Notes**
 We are not affiliated, associated, authorized, endorsed by, or in any way officially connected with Bitkub, or any of its subsidiaries or its affiliates.
 
@@ -43,27 +45,26 @@ $myBTC = $response->json('result.BTC.available');
 echo "My BTC balance: {$myBTC}";
 ```
 
-Websocket API
+WebSocket API
 
 ```php
+$client = \Farzai\Bitkub\ClientBuilder::create()
+    ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET_KEY')
+    ->build();
 
-$websocket = new \Farzai\Bitkub\WebSocket\Endpoints\MarketEndpoint(
-    new \Farzai\Bitkub\WebSocketClient(
-        \Farzai\Bitkub\ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET_KEY')
-            ->build(),
-    ),
-);
+$websocket = \Farzai\Bitkub\WebSocketClientBuilder::create()
+    ->setClient($client)
+    ->build();
 
-$websocket->listen('trade.thb_ada', function (\Farzai\Bitkub\WebSocket\Message $message) {
+$websocket->market()->listen('trade.thb_ada', function (\Farzai\Bitkub\WebSocket\Message $message) {
     // Do something
-    echo $message->sym.PHP_EOL;
+    echo $message->sym . PHP_EOL;
 });
 
 // Or you can use multiple symbols like this
-$websocket->listen(['trade.thb_ada', 'trade.thb_btc'], function (\Farzai\Bitkub\WebSocket\Message $message) {
+$websocket->market()->listen(['trade.thb_ada', 'trade.thb_btc'], function (\Farzai\Bitkub\WebSocket\Message $message) {
     // Do something
-    echo $message->sym.PHP_EOL;
+    echo $message->sym . PHP_EOL;
 });
 
 $websocket->run();
@@ -104,6 +105,9 @@ $websocket->run();
     - [User](#user)
       - [Check trading credit balance.](#check-trading-credit-balance)
       - [Check deposit/withdraw limitations and usage.](#check-depositwithdraw-limitations-and-usage)
+    - [WebSocket](#websocket)
+      - [Market streams](#market-streams)
+      - [Live order book](#live-order-book)
   - [Testing](#testing)
   - [Changelog](#changelog)
   - [Contributing](#contributing)
@@ -472,6 +476,54 @@ $user->tradingCredits();
 
 ```php
 $user->limits();
+```
+
+### WebSocket
+
+Create a WebSocket client using the `WebSocketClientBuilder`.
+
+```php
+$client = \Farzai\Bitkub\ClientBuilder::create()
+    ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET_KEY')
+    ->build();
+
+$websocket = \Farzai\Bitkub\WebSocketClientBuilder::create()
+    ->setClient($client)
+    ->build();
+```
+
+#### Market streams
+
+Subscribe to market data streams (trades, tickers, etc.).
+
+```php
+$websocket->market()->listen('trade.thb_btc', function (\Farzai\Bitkub\WebSocket\Message $message) {
+    echo $message->sym . PHP_EOL;
+});
+
+// Or subscribe to multiple streams at once
+$websocket->market()->listen(['trade.thb_btc', 'trade.thb_eth'], function (\Farzai\Bitkub\WebSocket\Message $message) {
+    echo $message->sym . PHP_EOL;
+});
+
+$websocket->run();
+```
+
+#### Live order book
+
+Subscribe to live order book updates. Requires a REST client to resolve symbol names.
+
+```php
+$websocket->liveOrderBook()->listen('THB_BTC', function (\Farzai\Bitkub\WebSocket\Message $message) {
+    echo $message . PHP_EOL;
+});
+
+// Or use a numeric symbol ID directly
+$websocket->liveOrderBook()->listen(1, function (\Farzai\Bitkub\WebSocket\Message $message) {
+    echo $message . PHP_EOL;
+});
+
+$websocket->run();
 ```
 
 ---

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Farzai\Bitkub\Constants\ErrorCodes;
 
 it('should see all error codes', function () {

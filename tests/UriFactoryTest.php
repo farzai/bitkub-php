@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Farzai\Bitkub\UriFactory;
 
 it('can create uri', function () {

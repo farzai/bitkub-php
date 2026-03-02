@@ -24,9 +24,9 @@ class GenerateSignatureV3 implements RequestInterceptor
      */
     private ClientInterface $client;
 
-    private static ?int $serverTimeDriftMs = null;
+    private ?int $serverTimeDriftMs = null;
 
-    private static float $lastSyncTime = 0;
+    private float $lastSyncTime = 0;
 
     private const SYNC_INTERVAL_SECONDS = 300;
 
@@ -69,22 +69,13 @@ class GenerateSignatureV3 implements RequestInterceptor
     {
         $now = (int) (microtime(true) * 1000);
 
-        if (self::$serverTimeDriftMs === null || (microtime(true) - self::$lastSyncTime) > self::SYNC_INTERVAL_SECONDS) {
+        if ($this->serverTimeDriftMs === null || (microtime(true) - $this->lastSyncTime) > self::SYNC_INTERVAL_SECONDS) {
             $endpoint = new SystemEndpoint($this->client);
             $serverTime = (int) $endpoint->serverTimestamp()->throw()->body();
-            self::$serverTimeDriftMs = $serverTime - $now;
-            self::$lastSyncTime = microtime(true);
+            $this->serverTimeDriftMs = $serverTime - $now;
+            $this->lastSyncTime = microtime(true);
         }
 
-        return $now + self::$serverTimeDriftMs;
-    }
-
-    /**
-     * Reset the cached timestamp drift (useful for testing).
-     */
-    public static function resetTimestampCache(): void
-    {
-        self::$serverTimeDriftMs = null;
-        self::$lastSyncTime = 0;
+        return $now + $this->serverTimeDriftMs;
     }
 }

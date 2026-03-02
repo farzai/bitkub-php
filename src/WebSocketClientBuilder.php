@@ -25,7 +25,7 @@ final class WebSocketClientBuilder
 
     private int $reconnectDelayMs = 1000;
 
-    final public function __construct() {}
+    public function __construct() {}
 
     public static function create(): static
     {

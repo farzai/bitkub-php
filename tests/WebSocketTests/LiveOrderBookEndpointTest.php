@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Farzai\Bitkub\ClientBuilder;
 use Farzai\Bitkub\Tests\MockHttpClient;
 use Farzai\Bitkub\Tests\WebSocketTests\MockWebSocketEngine;

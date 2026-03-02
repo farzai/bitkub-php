@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Farzai\Bitkub\Constants\ErrorCodes;
 use Farzai\Bitkub\Exceptions\BitkubResponseErrorCodeException;
 use Farzai\Bitkub\Responses\ResponseWithValidateErrorCode;

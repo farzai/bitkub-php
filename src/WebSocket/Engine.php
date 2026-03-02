@@ -81,7 +81,13 @@ class Engine implements WebSocketEngineInterface
                 $this->logger->info('[WebSocket] - Connection closed.');
             });
 
-            $client->start();
+            try {
+                $client->start();
+                break; // Clean close — no reconnect needed
+            } catch (\Throwable $e) {
+                $this->logger->error('[WebSocket] - Connection error: '.$e->getMessage());
+            }
+
             $attempt++;
         } while ($attempt <= $this->reconnectAttempts);
     }

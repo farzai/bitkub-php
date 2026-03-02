@@ -42,7 +42,7 @@ class CryptoEndpoint extends AbstractEndpoint
         $config = $this->client->getConfig();
 
         return $this->makeRequest('GET', '/api/v3/crypto/addresses')
-            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
+            ->withQuery($this->filterParams($params))
             ->acceptJson()
             ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
@@ -175,7 +175,7 @@ class CryptoEndpoint extends AbstractEndpoint
         $config = $this->client->getConfig();
 
         return $this->makeRequest('POST', '/api/v3/crypto/deposit-history')
-            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
+            ->withQuery($this->filterParams($params))
             ->acceptJson()
             ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
@@ -218,7 +218,7 @@ class CryptoEndpoint extends AbstractEndpoint
         $config = $this->client->getConfig();
 
         return $this->makeRequest('POST', '/api/v3/crypto/withdrawal-history')
-            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
+            ->withQuery($this->filterParams($params))
             ->acceptJson()
             ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
