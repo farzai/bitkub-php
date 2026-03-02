@@ -38,8 +38,6 @@ final class ClientBuilder
 
     /**
      * Create a new client builder instance.
-     *
-     * @return static
      */
     public static function create(): static
     {

@@ -9,7 +9,7 @@ use Farzai\Bitkub\Endpoints as RestApiEndpoints;
 class LiveOrderBookEndpoint extends AbstractEndpoint
 {
     /** @var array<string, int>|null */
-    private static ?array $symbolMap = null;
+    private ?array $symbolMap = null;
 
     /**
      * Add event listener.
@@ -19,9 +19,9 @@ class LiveOrderBookEndpoint extends AbstractEndpoint
      * });
      *
      * @param  string|int  $symbol  Symbol name or id.
-     * @param  callable|array<callable>  $listeners
+     * @param  callable|array<callable(\Farzai\Bitkub\WebSocket\Message): void>  $listeners
      */
-    public function listen($symbol, $listeners)
+    public function listen(string|int $symbol, callable|array $listeners): static
     {
         if (! is_numeric($symbol)) {
             $symbol = $this->resolveSymbolId((string) $symbol);
@@ -34,28 +34,25 @@ class LiveOrderBookEndpoint extends AbstractEndpoint
 
     private function resolveSymbolId(string $symbol): int
     {
-        if (self::$symbolMap === null) {
-            self::$symbolMap = [];
-            $market = new RestApiEndpoints\MarketEndpoint($this->websocket->getClient());
+        $client = $this->websocket->getClient();
+        if ($client === null) {
+            throw new \RuntimeException('A REST client is required to resolve symbol names. Use numeric symbol IDs or set a client via WebSocketClientBuilder::setClient().');
+        }
+
+        if ($this->symbolMap === null) {
+            $this->symbolMap = [];
+            $market = new RestApiEndpoints\MarketEndpoint($client);
 
             foreach ($market->symbols()->throw()->json('result') as $item) {
-                self::$symbolMap[strtoupper($item['symbol'])] = $item['id'];
+                $this->symbolMap[strtoupper($item['symbol'])] = $item['id'];
             }
         }
 
         $key = strtoupper(trim($symbol));
-        if (! isset(self::$symbolMap[$key])) {
+        if (! isset($this->symbolMap[$key])) {
             throw new \InvalidArgumentException('Invalid symbol name. Given: '.$symbol);
         }
 
-        return self::$symbolMap[$key];
-    }
-
-    /**
-     * Reset the cached symbol map (useful for testing).
-     */
-    public static function resetSymbolMapCache(): void
-    {
-        self::$symbolMap = null;
+        return $this->symbolMap[$key];
     }
 }

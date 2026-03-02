@@ -16,11 +16,15 @@ class Message implements \JsonSerializable, ArrayAccess
 
     private DateTimeImmutable $receivedAt;
 
-    public function __construct(string $body, DateTimeImmutable $receivedAt)
+    public function __construct(string $body, DateTimeImmutable $receivedAt, ?array $decoded = null)
     {
         $this->body = $body;
-        $decoded = json_decode($body, true);
-        $this->jsonDecoded = is_array($decoded) ? $decoded : null;
+        if ($decoded !== null) {
+            $this->jsonDecoded = $decoded;
+        } else {
+            $raw = json_decode($body, true);
+            $this->jsonDecoded = is_array($raw) ? $raw : null;
+        }
         $this->receivedAt = $receivedAt;
     }
 

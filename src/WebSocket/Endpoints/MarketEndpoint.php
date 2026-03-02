@@ -14,13 +14,13 @@ class MarketEndpoint extends AbstractEndpoint
      * });
      *
      * @param  string[]|string  $streamNames
-     * @param  callable|array<callable>  $listeners
+     * @param  callable|array<callable(\Farzai\Bitkub\WebSocket\Message): void>  $listeners
      */
-    public function listen($streamNames, $listeners)
+    public function listen(string|array $streamNames, callable|array $listeners): static
     {
         $streamNames = $this->normalizeStreamNames($streamNames);
 
-        $this->getLogger()->debug('Add event listener for stream: '.implode(', ', $streamNames));
+        $this->getLogger()->debug('Subscribing to streams: '.implode(', ', $streamNames));
 
         foreach ($streamNames as $name) {
             $this->websocket->addListener($name, $listeners);
@@ -33,18 +33,23 @@ class MarketEndpoint extends AbstractEndpoint
      * Normalize stream names.
      *
      * @param  string[]|string  $streamNames
+     * @return string[]
      */
-    private function normalizeStreamNames($streamNames): array
+    private function normalizeStreamNames(string|array $streamNames): array
     {
         if (is_string($streamNames)) {
             $streamNames = explode(',', $streamNames);
         }
 
-        $streamNames = array_filter(array_map('trim', $streamNames), function ($streamName) {
-            return ! empty($streamName);
-        });
+        $streamNames = array_filter(
+            array_map('trim', $streamNames),
+            fn (string $name): bool => ! empty($name),
+        );
 
-        $streamNames = array_map(fn ($streamName) => $this->getStreamName($streamName), $streamNames);
+        $streamNames = array_map(
+            fn (string $name): string => $this->getStreamName($name),
+            $streamNames,
+        );
 
         return $streamNames;
     }

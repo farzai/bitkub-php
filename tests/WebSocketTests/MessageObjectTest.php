@@ -89,3 +89,15 @@ it('should throw BadMethodCallException on __unset', function () {
 
     unset($message->event);
 })->throws(\BadMethodCallException::class, 'Message is immutable.');
+
+it('accepts pre-decoded array and skips json_decode', function () {
+    $decoded = ['event' => 'trade', 'price' => 42000];
+    $body = json_encode($decoded);
+
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable(), $decoded);
+
+    expect($message->json())->toBe($decoded);
+    expect($message->json('event'))->toBe('trade');
+    expect($message->json('price'))->toBe(42000);
+    expect($message->getBody())->toBe($body);
+});
