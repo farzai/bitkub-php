@@ -14,7 +14,7 @@
         }
     ],
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "farzai/support": "^1.2",
         "farzai/transport": "^2.1",
         "phrity/websocket": "^3.0"
