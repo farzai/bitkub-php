@@ -71,13 +71,16 @@ it('should valid response if response without farzai response', function () {
     expect($exception->getResponse())->toBe($psrResponse);
 });
 
-it('should be error code not found', function () {
+it('should handle missing error code gracefully', function () {
     $psrResponse = MockHttpClient::response(200, json_encode([
         // Empty error code
     ]));
 
-    new BitkubResponseErrorCodeException($psrResponse);
-})->throws(\Exception::class, 'Error code not found.');
+    $exception = new BitkubResponseErrorCodeException($psrResponse);
+
+    expect($exception->getMessage())->toBe('Malformed response: error code not found.');
+    expect($exception->getCode())->toBe(0);
+});
 
 it('should not throw exception when error code is null', function () {
     $psrRequest = $this->createMock(PsrRequestInterface::class);
@@ -142,6 +145,38 @@ it('decorator delegates PSR-7 getStatusCode', function () {
     $response = new ResponseWithValidateErrorCode($response);
 
     expect($response->getStatusCode())->toBe(201);
+});
+
+it('throw with custom callback still validates error codes', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode([
+        'error' => 1,
+    ]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    $callbackCalled = false;
+    $response->throw(function () use (&$callbackCalled) {
+        $callbackCalled = true;
+    });
+})->throws(BitkubResponseErrorCodeException::class, 'Invalid JSON payload');
+
+it('throw with custom callback is called when no error', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode([
+        'error' => 0,
+    ]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    $callbackCalled = false;
+    $response->throw(function () use (&$callbackCalled) {
+        $callbackCalled = true;
+    });
+
+    expect($callbackCalled)->toBeTrue();
 });
 
 it('decorator delegates PSR-7 getBody', function () {

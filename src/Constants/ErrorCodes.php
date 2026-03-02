@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\Constants;
 
 class ErrorCodes

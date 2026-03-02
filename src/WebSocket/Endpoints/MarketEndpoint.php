@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\WebSocket\Endpoints;
 
 class MarketEndpoint extends AbstractEndpoint
@@ -51,8 +53,7 @@ class MarketEndpoint extends AbstractEndpoint
     {
         $streamName = 'market.'.preg_replace('/^market\./', '', $streamName);
 
-        // Validate stream name format.
-        if (substr_count($streamName, '.') === 2) {
+        if (preg_match('/^market\.[a-z]+\.[a-z0-9_]+$/i', $streamName)) {
             return $streamName;
         }
 

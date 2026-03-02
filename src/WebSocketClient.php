@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub;
 
 use Farzai\Bitkub\Contracts\ClientInterface;
@@ -62,7 +64,7 @@ class WebSocketClient
         return $this->listeners;
     }
 
-    public function run()
+    public function run(): void
     {
         $this->websocket->handle($this->listeners);
     }

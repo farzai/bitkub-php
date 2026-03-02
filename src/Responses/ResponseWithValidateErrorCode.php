@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\Responses;
 
 use Farzai\Bitkub\Exceptions\BitkubResponseErrorCodeException;
@@ -15,13 +17,17 @@ class ResponseWithValidateErrorCode extends AbstractResponseDecorator
      */
     public function throw(?callable $callback = null): static
     {
-        parent::throw($callback ?? function (ResponseInterface $response, ?\Exception $e) use ($callback) {
+        parent::throw(function (ResponseInterface $response, ?\Exception $e) use ($callback) {
             $errorCode = $this->json('error');
             if ($errorCode !== null && $errorCode !== 0) {
                 throw new BitkubResponseErrorCodeException($response);
             }
 
-            return $callback ? $callback($response, $e) : $response;
+            if ($callback) {
+                return $callback($response, $e);
+            }
+
+            return $response;
         });
 
         return $this;

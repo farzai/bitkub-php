@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\Endpoints;
 
 use Farzai\Bitkub\Requests\GenerateSignatureV3;
@@ -70,7 +72,7 @@ class MarketEndpoint extends AbstractEndpoint
         return $this->makeRequest('GET', '/api/market/ticker')
             ->withQuery(array_filter([
                 'sym' => $symbol,
-            ]))
+            ], fn ($value) => $value !== null && $value !== ''))
             ->send();
     }
 
@@ -98,7 +100,7 @@ class MarketEndpoint extends AbstractEndpoint
     public function trades(array $params): ResponseInterface
     {
         return $this->makeRequest('GET', '/api/market/trades')
-            ->withQuery(array_filter($params))
+            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
             ->send();
     }
 
@@ -130,7 +132,7 @@ class MarketEndpoint extends AbstractEndpoint
     public function bids(array $params): ResponseInterface
     {
         return $this->makeRequest('GET', '/api/market/bids')
-            ->withQuery(array_filter($params))
+            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
             ->send();
     }
 
@@ -162,7 +164,7 @@ class MarketEndpoint extends AbstractEndpoint
     public function asks(array $params): ResponseInterface
     {
         return $this->makeRequest('GET', '/api/market/asks')
-            ->withQuery(array_filter($params))
+            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
             ->send();
     }
 
@@ -205,7 +207,7 @@ class MarketEndpoint extends AbstractEndpoint
     public function books(array $params): ResponseInterface
     {
         return $this->makeRequest('GET', '/api/market/books')
-            ->withQuery(array_filter($params))
+            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
             ->send();
     }
 
@@ -418,11 +420,9 @@ class MarketEndpoint extends AbstractEndpoint
         $config = $this->client->getConfig();
 
         return $this->makeRequest('GET', '/api/v3/market/my-open-orders')
+            ->withQuery(['sym' => $sym])
             ->acceptJson()
             ->withInterceptor(new GenerateSignatureV3($config, $this->client))
-            ->withBody([
-                'sym' => $sym,
-            ])
             ->send();
     }
 
@@ -471,7 +471,7 @@ class MarketEndpoint extends AbstractEndpoint
         $config = $this->client->getConfig();
 
         return $this->makeRequest('GET', '/api/v3/market/my-order-history')
-            ->withQuery(array_filter($params))
+            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
             ->acceptJson()
             ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
@@ -529,7 +529,7 @@ class MarketEndpoint extends AbstractEndpoint
         $config = $this->client->getConfig();
 
         return $this->makeRequest('GET', '/api/v3/market/order-info')
-            ->withQuery(array_filter($params))
+            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
             ->acceptJson()
             ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();

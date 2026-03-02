@@ -352,6 +352,123 @@ it('should call placeAsk success', function () {
     expect($response->json('result.hash'))->toBe('fwQ6dnQWQPs4cbatF5Am2xCDP1J');
 });
 
+it('should get openOrders success', function () {
+    $psrClient = MockHttpClient::make()
+        ->addSequence(fn ($client) => MockHttpClient::responseServerTimestamp())
+        ->addSequence(fn ($client) => $client->createResponse(200, json_encode([
+            'error' => 0,
+            'result' => [
+                [
+                    'id' => '2',
+                    'hash' => 'fwQ6dnQWQPs4cbatFSJpMCcKTFR',
+                    'side' => 'SELL',
+                    'type' => 'limit',
+                    'rate' => 15000,
+                    'fee' => 35.01,
+                    'credit' => 35.01,
+                    'amount' => 0.93333334,
+                    'receive' => 14000,
+                    'parent_id' => 1,
+                    'super_id' => 1,
+                    'ts' => 1533834844,
+                ],
+            ],
+        ])));
+
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setHttpClient($psrClient)
+        ->build();
+
+    $market = $client->market();
+
+    $response = $market->openOrders('THB_BTC');
+
+    expect($response)->toBeInstanceOf(ResponseInterface::class);
+    expect($response->json('result.0.id'))->toBe('2');
+    expect($response->json('result.0.side'))->toBe('SELL');
+});
+
+it('should get myOrderHistory success', function () {
+    $psrClient = MockHttpClient::make()
+        ->addSequence(fn ($client) => MockHttpClient::responseServerTimestamp())
+        ->addSequence(fn ($client) => $client->createResponse(200, json_encode([
+            'error' => 0,
+            'result' => [
+                [
+                    'txn_id' => 'ETHBUY0000000197',
+                    'order_id' => '240',
+                    'hash' => 'fwQ6dnQWQPs4cbaujNyejinS43a',
+                    'side' => 'buy',
+                    'type' => 'limit',
+                    'rate' => '13335.57',
+                    'fee' => '0.34',
+                    'credit' => '0.34',
+                    'amount' => '0.00999987',
+                    'ts' => 1531513395,
+                ],
+            ],
+            'pagination' => [
+                'page' => 1,
+                'last' => 1,
+            ],
+        ])));
+
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setHttpClient($psrClient)
+        ->build();
+
+    $market = $client->market();
+
+    $response = $market->myOrderHistory([
+        'sym' => 'THB_ETH',
+        'p' => 1,
+        'lmt' => 10,
+    ]);
+
+    expect($response)->toBeInstanceOf(ResponseInterface::class);
+    expect($response->json('result.0.txn_id'))->toBe('ETHBUY0000000197');
+});
+
+it('should get myOrderInfo success', function () {
+    $psrClient = MockHttpClient::make()
+        ->addSequence(fn ($client) => MockHttpClient::responseServerTimestamp())
+        ->addSequence(fn ($client) => $client->createResponse(200, json_encode([
+            'error' => 0,
+            'result' => [
+                'id' => '289',
+                'first' => '289',
+                'parent' => '0',
+                'last' => '316',
+                'amount' => 4000,
+                'rate' => 291000,
+                'fee' => 10,
+                'credit' => 10,
+                'filled' => 3999.97,
+                'total' => 4000,
+                'status' => 'filled',
+            ],
+        ])));
+
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setHttpClient($psrClient)
+        ->build();
+
+    $market = $client->market();
+
+    $response = $market->myOrderInfo([
+        'sym' => 'THB_BTC',
+        'id' => '289',
+        'sd' => 'buy',
+    ]);
+
+    expect($response)->toBeInstanceOf(ResponseInterface::class);
+    expect($response->json('result.id'))->toBe('289');
+    expect($response->json('result.status'))->toBe('filled');
+});
+
 it('should call cancelOrder success', function () {
     $psrClient = MockHttpClient::make()
         ->addSequence(fn ($client) => MockHttpClient::responseServerTimestamp())

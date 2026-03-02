@@ -18,6 +18,11 @@ class MockHttpClient extends TestCase implements PsrClientInterface
     private array $sequence = [];
 
     /**
+     * @var array<int, PsrRequestInterface>
+     */
+    private array $recordedRequests = [];
+
+    /**
      * Create a new mock http client instance.
      */
     public static function make(): self
@@ -48,13 +53,34 @@ class MockHttpClient extends TestCase implements PsrClientInterface
      */
     public function sendRequest(PsrRequestInterface $request): PsrResponseInterface
     {
+        $this->recordedRequests[] = $request;
+
+        if (empty($this->sequence)) {
+            throw new \RuntimeException('No more mock responses in the sequence. Did you forget to add mock responses?');
+        }
+
         return array_shift($this->sequence);
+    }
+
+    /**
+     * @return array<int, PsrRequestInterface>
+     */
+    public function getRecordedRequests(): array
+    {
+        return $this->recordedRequests;
+    }
+
+    public function getLastRequest(): ?PsrRequestInterface
+    {
+        return end($this->recordedRequests) ?: null;
     }
 
     public function createStream(string $contents): PsrStreamInterface
     {
         $stream = $this->createMock(PsrStreamInterface::class);
         $stream->method('getContents')->willReturn($contents);
+        $stream->method('__toString')->willReturn($contents);
+        $stream->method('rewind')->willReturnCallback(function () {});
 
         return $stream;
     }

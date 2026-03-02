@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\Endpoints;
 
 use Farzai\Bitkub\Contracts\ClientInterface;

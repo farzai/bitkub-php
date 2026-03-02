@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\Endpoints;
 
 use Farzai\Bitkub\Requests\GenerateSignatureV3;
@@ -40,7 +42,7 @@ class CryptoEndpoint extends AbstractEndpoint
         $config = $this->client->getConfig();
 
         return $this->makeRequest('GET', '/api/v3/crypto/addresses')
-            ->withQuery(array_filter($params))
+            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
             ->acceptJson()
             ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
@@ -173,7 +175,7 @@ class CryptoEndpoint extends AbstractEndpoint
         $config = $this->client->getConfig();
 
         return $this->makeRequest('POST', '/api/v3/crypto/deposit-history')
-            ->withQuery(array_filter($params))
+            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
             ->acceptJson()
             ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();
@@ -216,7 +218,7 @@ class CryptoEndpoint extends AbstractEndpoint
         $config = $this->client->getConfig();
 
         return $this->makeRequest('POST', '/api/v3/crypto/withdrawal-history')
-            ->withQuery(array_filter($params))
+            ->withQuery(array_filter($params, fn ($value) => $value !== null && $value !== ''))
             ->acceptJson()
             ->withInterceptor(new GenerateSignatureV3($config, $this->client))
             ->send();

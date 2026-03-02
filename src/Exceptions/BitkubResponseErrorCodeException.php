@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\Exceptions;
 
 use Farzai\Bitkub\Constants\ErrorCodes;
@@ -29,7 +31,9 @@ class BitkubResponseErrorCodeException extends \Exception
         }
 
         if (is_null($errorCode)) {
-            throw new \Exception('Error code not found.');
+            parent::__construct('Malformed response: error code not found.', 0);
+
+            return;
         }
 
         $message = ErrorCodes::getDescription($errorCode);

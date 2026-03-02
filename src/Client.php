@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub;
 
 use Farzai\Bitkub\Contracts\ClientInterface;
@@ -40,24 +42,32 @@ class Client implements ClientInterface
         $this->logger = $logger;
     }
 
+    private ?Endpoints\MarketEndpoint $marketEndpoint = null;
+
+    private ?Endpoints\CryptoEndpoint $cryptoEndpoint = null;
+
+    private ?Endpoints\UserEndpoint $userEndpoint = null;
+
+    private ?Endpoints\SystemEndpoint $systemEndpoint = null;
+
     public function market(): Endpoints\MarketEndpoint
     {
-        return new Endpoints\MarketEndpoint($this);
+        return $this->marketEndpoint ??= new Endpoints\MarketEndpoint($this);
     }
 
     public function crypto(): Endpoints\CryptoEndpoint
     {
-        return new Endpoints\CryptoEndpoint($this);
+        return $this->cryptoEndpoint ??= new Endpoints\CryptoEndpoint($this);
     }
 
     public function user(): Endpoints\UserEndpoint
     {
-        return new Endpoints\UserEndpoint($this);
+        return $this->userEndpoint ??= new Endpoints\UserEndpoint($this);
     }
 
     public function system(): Endpoints\SystemEndpoint
     {
-        return new Endpoints\SystemEndpoint($this);
+        return $this->systemEndpoint ??= new Endpoints\SystemEndpoint($this);
     }
 
     public function getTransport(): Transport

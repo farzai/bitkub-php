@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub;
 
 use Farzai\Bitkub\Exceptions\InvalidArgumentException;
@@ -10,7 +12,7 @@ use Psr\Log\NullLogger;
 
 final class ClientBuilder
 {
-    const DEFAULT_HOST = 'api.bitkub.com';
+    private const DEFAULT_HOST = 'api.bitkub.com';
 
     /**
      * The config.
@@ -32,14 +34,14 @@ final class ClientBuilder
     /**
      * The number of times to retry failed requests.
      */
-    private $retries = 3;
+    private int $retries = 3;
 
     /**
      * Create a new client builder instance.
      *
      * @return static
      */
-    public static function create()
+    public static function create(): static
     {
         return new self;
     }
@@ -49,7 +51,7 @@ final class ClientBuilder
      *
      * @return $this
      */
-    public function setCredentials(string $apiKey, string $secretKey)
+    public function setCredentials(string $apiKey, string $secretKey): static
     {
         $this->config = array_merge($this->config, [
             'api_key' => $apiKey,
@@ -64,7 +66,7 @@ final class ClientBuilder
      *
      * @return $this
      */
-    public function setHttpClient(PsrClientInterface $httpClient)
+    public function setHttpClient(PsrClientInterface $httpClient): static
     {
         $this->httpClient = $httpClient;
 
@@ -76,14 +78,14 @@ final class ClientBuilder
      *
      * @return $this
      */
-    public function setLogger(PsrLoggerInterface $logger)
+    public function setLogger(PsrLoggerInterface $logger): static
     {
         $this->logger = $logger;
 
         return $this;
     }
 
-    public function setRetries(int $retries)
+    public function setRetries(int $retries): static
     {
         if ($retries < 0) {
             throw new \InvalidArgumentException('Retries must be greater than or equal to 0.');
@@ -94,7 +96,7 @@ final class ClientBuilder
         return $this;
     }
 
-    public function build()
+    public function build(): Client
     {
         $this->ensureConfigIsValid();
 

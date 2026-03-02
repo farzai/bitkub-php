@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\Requests;
 
 use Farzai\Bitkub\Contracts\ClientInterface;
@@ -22,6 +24,12 @@ class GenerateSignatureV3 implements RequestInterceptor
      */
     private ClientInterface $client;
 
+    private static ?int $serverTimeDriftMs = null;
+
+    private static float $lastSyncTime = 0;
+
+    private const SYNC_INTERVAL_SECONDS = 300;
+
     /**
      * Create a new client instance.
      */
@@ -36,13 +44,14 @@ class GenerateSignatureV3 implements RequestInterceptor
      */
     public function apply(PsrRequestInterface $request): PsrRequestInterface
     {
-        $endpoint = new SystemEndpoint($this->client);
-
-        $timestamp = (int) $endpoint->serverTimestamp()->throw()->body();
+        $timestamp = $this->getTimestamp();
 
         $method = strtoupper($request->getMethod());
         $path = '/'.trim($request->getUri()->getPath(), '/');
-        $payload = $request->getBody()->getContents() ?: '';
+
+        $body = $request->getBody();
+        $payload = $body->getContents() ?: '';
+        $body->rewind();
 
         $query = $request->getUri()->getQuery();
         if (! empty($query)) {
@@ -53,6 +62,29 @@ class GenerateSignatureV3 implements RequestInterceptor
 
         return $request->withHeader('X-BTK-APIKEY', $this->config['api_key'])
             ->withHeader('X-BTK-SIGN', $signature)
-            ->withHeader('X-BTK-TIMESTAMP', $timestamp);
+            ->withHeader('X-BTK-TIMESTAMP', (string) $timestamp);
+    }
+
+    private function getTimestamp(): int
+    {
+        $now = (int) (microtime(true) * 1000);
+
+        if (self::$serverTimeDriftMs === null || (microtime(true) - self::$lastSyncTime) > self::SYNC_INTERVAL_SECONDS) {
+            $endpoint = new SystemEndpoint($this->client);
+            $serverTime = (int) $endpoint->serverTimestamp()->throw()->body();
+            self::$serverTimeDriftMs = $serverTime - $now;
+            self::$lastSyncTime = microtime(true);
+        }
+
+        return $now + self::$serverTimeDriftMs;
+    }
+
+    /**
+     * Reset the cached timestamp drift (useful for testing).
+     */
+    public static function resetTimestampCache(): void
+    {
+        self::$serverTimeDriftMs = null;
+        self::$lastSyncTime = 0;
     }
 }

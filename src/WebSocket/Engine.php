@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\WebSocket;
 
 use Farzai\Bitkub\Contracts\WebSocketEngineInterface;
@@ -33,9 +35,9 @@ class Engine implements WebSocketEngineInterface
         $client->onText(function (WebSocketClient $client, WebSocketConnection $connection, WebSocketMessage $message) use ($listeners) {
             $receivedAt = Carbon::now();
 
-            $data = @json_decode($message->getContent(), true) ?? [];
-            if (! isset($data['stream'])) {
-                $this->logger->warning('[WebSocket] - Unknown data: '.$message->getContent());
+            $data = json_decode($message->getContent(), true);
+            if (! is_array($data) || ! isset($data['stream'])) {
+                $this->logger->warning('[WebSocket] - Received non-JSON or unknown message format.');
 
                 return;
             }

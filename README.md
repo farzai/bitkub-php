@@ -8,7 +8,7 @@
 Simplify the integration of the Bitkub API into your PHP application.
 [Bitkub API Documentation](https://github.com/bitkub/bitkub-official-api-docs/blob/master/restful-api.md)
 
-**Notes
+**Notes**
 We are not affiliated, associated, authorized, endorsed by, or in any way officially connected with Bitkub, or any of its subsidiaries or its affiliates.
 
 ## Installation
@@ -61,7 +61,7 @@ $websocket->listen('trade.thb_ada', function (\Farzai\Bitkub\WebSocket\Message $
 });
 
 // Or you can use multiple symbols like this
-$websocket->listen(['trade.thb_ada', 'trade.thb_btc', function (\Farzai\Bitkub\WebSocket\Message $message) {
+$websocket->listen(['trade.thb_ada', 'trade.thb_btc'], function (\Farzai\Bitkub\WebSocket\Message $message) {
     // Do something
     echo $message->sym.PHP_EOL;
 });
@@ -112,7 +112,7 @@ $websocket->run();
   - [License](#license)
 
 ### Market
-Call the market endpoint. 
+Call the market endpoint.
 This will return an instance of `Farzai\Bitkub\Endpoints\MarketEndpoint` class.
 
 ```php
@@ -192,7 +192,7 @@ $market->books([
 ```
 
 #### Get user available balances
-- GET `/api/market/wallet`
+- POST `/api/v3/market/wallet`
 ```php
 $market->wallet();
 ```
@@ -351,7 +351,7 @@ $crypto->addresses([
 $crypto->withdrawal([
     // string: Currency for withdrawal (e.g. BTC, ETH)
     'cur' => 'BTC',
-    
+
     // float: Amount you want to withdraw
     'amt' => 0.001,
 

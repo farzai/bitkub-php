@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\WebSocket\Endpoints;
 
 use Farzai\Bitkub\Endpoints as RestApiEndpoints;
 
 class LiveOrderBookEndpoint extends AbstractEndpoint
 {
+    /** @var array<string, int>|null */
+    private static ?array $symbolMap = null;
+
     /**
      * Add event listener.
      *
@@ -18,32 +23,39 @@ class LiveOrderBookEndpoint extends AbstractEndpoint
      */
     public function listen($symbol, $listeners)
     {
-        // Check if symbol is numeric.
         if (! is_numeric($symbol)) {
-
-            $this->getLogger()->debug('Find symbol id by name: '.$symbol);
-
-            // Find symbol id by name.
-            $market = new RestApiEndpoints\MarketEndpoint($this->websocket->getClient());
-
-            foreach ($market->symbols()->throw()->json('result') as $item) {
-                if ($item['symbol'] === strtoupper(trim($symbol))) {
-                    $symbol = $item['id'];
-
-                    $this->getLogger()->debug('Found symbol id: '.$symbol);
-                    break;
-                }
-            }
-
-            if (! is_numeric($symbol)) {
-                $this->getLogger()->debug('Invalid symbol name. Given: '.$symbol);
-
-                throw new \InvalidArgumentException('Invalid symbol name. Given: '.$symbol);
-            }
+            $symbol = $this->resolveSymbolId((string) $symbol);
         }
 
         $this->websocket->addListener('orderbook/'.$symbol, $listeners);
 
         return $this;
+    }
+
+    private function resolveSymbolId(string $symbol): int
+    {
+        if (self::$symbolMap === null) {
+            self::$symbolMap = [];
+            $market = new RestApiEndpoints\MarketEndpoint($this->websocket->getClient());
+
+            foreach ($market->symbols()->throw()->json('result') as $item) {
+                self::$symbolMap[strtoupper($item['symbol'])] = $item['id'];
+            }
+        }
+
+        $key = strtoupper(trim($symbol));
+        if (! isset(self::$symbolMap[$key])) {
+            throw new \InvalidArgumentException('Invalid symbol name. Given: '.$symbol);
+        }
+
+        return self::$symbolMap[$key];
+    }
+
+    /**
+     * Reset the cached symbol map (useful for testing).
+     */
+    public static function resetSymbolMapCache(): void
+    {
+        self::$symbolMap = null;
     }
 }
