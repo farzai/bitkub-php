@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Farzai\Bitkub\WebSocket\Message;
 use Farzai\Support\Carbon;
 
@@ -39,22 +41,7 @@ it('should return message object', function () {
 
     expect($message->json('data.0.0'))->toBe(121.82);
 
-    // Test setter
-    $message->event = 'askschanged';
-    expect($message->event)->toBe('askschanged');
-
-    $message['event'] = 'askschanged';
-    expect($message->event)->toBe('askschanged');
-
-    // Test unset
     expect(isset($message->event))->toBeTrue();
-
-    unset($message->event);
-    expect($message->event)->toBeNull();
-    expect(isset($message->event))->toBeFalse();
-
-    unset($message['pairing_id']);
-    expect($message->pairing_id)->toBeNull();
 });
 
 it('should return null if json is not valid', function () {
@@ -65,4 +52,97 @@ it('should return null if json is not valid', function () {
     $message = new Message($body, $currentDateTime->toDateTimeImmutable());
 
     expect($message->json())->toBeNull();
+});
+
+it('should return empty array from toArray when json is invalid', function () {
+    $body = 'invalid json';
+
+    $currentDateTime = Carbon::now();
+
+    $message = new Message($body, $currentDateTime->toDateTimeImmutable());
+
+    expect($message->toArray())->toBe([]);
+});
+
+it('should throw BadMethodCallException on offsetSet', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    $message['event'] = 'changed';
+})->throws(\BadMethodCallException::class, 'Message is immutable.');
+
+it('should throw BadMethodCallException on offsetUnset', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    unset($message['event']);
+})->throws(\BadMethodCallException::class, 'Message is immutable.');
+
+it('should throw BadMethodCallException on __set', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    $message->event = 'changed';
+})->throws(\BadMethodCallException::class, 'Message is immutable.');
+
+it('should throw BadMethodCallException on __unset', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    unset($message->event);
+})->throws(\BadMethodCallException::class, 'Message is immutable.');
+
+it('accepts pre-decoded array and skips json_decode', function () {
+    $decoded = ['event' => 'trade', 'price' => 42000];
+    $body = json_encode($decoded);
+
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable(), $decoded);
+
+    expect($message->json())->toBe($decoded);
+    expect($message->json('event'))->toBe('trade');
+    expect($message->json('price'))->toBe(42000);
+    expect($message->getBody())->toBe($body);
+});
+
+it('offsetGet returns null for missing key', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect($message['nonexistent'])->toBeNull();
+});
+
+it('offsetExists returns false for missing key', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect($message->offsetExists('nonexistent'))->toBeFalse();
+});
+
+it('__get returns null for missing key', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect($message->nonexistent)->toBeNull();
+});
+
+it('__isset returns false for missing key', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect(isset($message->nonexistent))->toBeFalse();
+});
+
+it('json with key returns null on invalid json body', function () {
+    $body = 'not json';
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect($message->json('somekey'))->toBeNull();
+});
+
+it('jsonSerialize returns same as toArray', function () {
+    $decoded = ['event' => 'trade', 'data' => [1, 2, 3]];
+    $body = json_encode($decoded);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect($message->jsonSerialize())->toBe($message->toArray());
 });

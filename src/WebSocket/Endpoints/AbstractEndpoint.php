@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\WebSocket\Endpoints;
 
 use Farzai\Bitkub\WebSocketClient;
@@ -16,12 +18,12 @@ abstract class AbstractEndpoint
     /**
      * Run the websocket.
      */
-    public function run()
+    public function run(): void
     {
         $this->websocket->run();
     }
 
-    protected function getLogger()
+    protected function getLogger(): \Psr\Log\LoggerInterface
     {
         return $this->websocket->getLogger();
     }

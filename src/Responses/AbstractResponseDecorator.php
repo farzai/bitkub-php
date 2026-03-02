@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\Responses;
 
 use Farzai\Transport\Contracts\ResponseInterface;

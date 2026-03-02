@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\Contracts;
 
 use Farzai\Transport\Transport;
 use Psr\Http\Message\RequestInterface as PsrRequestInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Log\LoggerInterface;
 
 interface ClientInterface
@@ -26,5 +29,5 @@ interface ClientInterface
     /**
      * Send the request.
      */
-    public function sendRequest(PsrRequestInterface $request);
+    public function sendRequest(PsrRequestInterface $request): PsrResponseInterface;
 }

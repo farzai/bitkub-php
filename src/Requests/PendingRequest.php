@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\Requests;
 
 use Farzai\Bitkub\Contracts\ClientInterface;
@@ -13,20 +15,20 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 class PendingRequest
 {
-    public ClientInterface $client;
+    private ClientInterface $client;
 
-    public string $method;
+    private string $method;
 
-    public string $path;
+    private string $path;
 
-    public array $options;
+    private array $options;
 
     /**
      * The request interceptors.
      *
-     * @var array<\Farzai\Bitkub\Contracts\RequestInterceptor>
+     * @var array<RequestInterceptor>
      */
-    public $interceptors = [];
+    private array $interceptors = [];
 
     /**
      * Create a new pending request instance.
@@ -42,7 +44,7 @@ class PendingRequest
     /**
      * Set the request method.
      */
-    public function method(string $method)
+    public function method(string $method): static
     {
         $this->method = $method;
 
@@ -52,7 +54,7 @@ class PendingRequest
     /**
      * Set the request path.
      */
-    public function path(string $path)
+    public function path(string $path): static
     {
         $this->path = $path;
 
@@ -62,14 +64,14 @@ class PendingRequest
     /**
      * Set the request options.
      */
-    public function options(array $options)
+    public function options(array $options): static
     {
         $this->options = $options;
 
         return $this;
     }
 
-    public function withInterceptor(RequestInterceptor $interceptor)
+    public function withInterceptor(RequestInterceptor $interceptor): static
     {
         $this->interceptors[] = $interceptor;
 
@@ -79,7 +81,7 @@ class PendingRequest
     /**
      * Set the request body.
      */
-    public function withBody(mixed $body)
+    public function withBody(mixed $body): static
     {
         $this->options['body'] = $body;
 
@@ -89,7 +91,7 @@ class PendingRequest
     /**
      * Set the request query.
      */
-    public function withQuery(array $query)
+    public function withQuery(array $query): static
     {
         $this->options['query'] = $query;
 
@@ -99,26 +101,26 @@ class PendingRequest
     /**
      * Set the request headers.
      */
-    public function withHeaders(array $headers)
+    public function withHeaders(array $headers): static
     {
         $this->options['headers'] = array_merge($this->options['headers'] ?? [], $headers);
 
         return $this;
     }
 
-    public function withHeader(string $key, string $value)
+    public function withHeader(string $key, string $value): static
     {
         $this->options['headers'][$key] = $value;
 
         return $this;
     }
 
-    public function acceptJson()
+    public function acceptJson(): static
     {
         return $this->withHeader('Accept', 'application/json');
     }
 
-    public function asJson()
+    public function asJson(): static
     {
         return $this->withHeader('Content-Type', 'application/json');
     }

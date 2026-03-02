@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\WebSocket;
 
 use ArrayAccess;
@@ -10,14 +12,19 @@ class Message implements \JsonSerializable, ArrayAccess
 {
     private string $body;
 
-    private $jsonDecoded;
+    private ?array $jsonDecoded;
 
     private DateTimeImmutable $receivedAt;
 
-    public function __construct(string $body, DateTimeImmutable $receivedAt)
+    public function __construct(string $body, DateTimeImmutable $receivedAt, ?array $decoded = null)
     {
         $this->body = $body;
-        $this->jsonDecoded = @json_decode($body, true) ?? false;
+        if ($decoded !== null) {
+            $this->jsonDecoded = $decoded;
+        } else {
+            $raw = json_decode($body, true);
+            $this->jsonDecoded = is_array($raw) ? $raw : null;
+        }
         $this->receivedAt = $receivedAt;
     }
 
@@ -34,7 +41,11 @@ class Message implements \JsonSerializable, ArrayAccess
     public function json($key = null)
     {
         if ($key === null) {
-            return $this->jsonDecoded ?: null;
+            return $this->jsonDecoded;
+        }
+
+        if ($this->jsonDecoded === null) {
+            return null;
         }
 
         return Arr::get($this->jsonDecoded, $key);
@@ -52,7 +63,7 @@ class Message implements \JsonSerializable, ArrayAccess
 
     public function toArray(): array
     {
-        return $this->jsonDecoded;
+        return $this->jsonDecoded ?? [];
     }
 
     public function offsetExists($offset): bool
@@ -67,12 +78,12 @@ class Message implements \JsonSerializable, ArrayAccess
 
     public function offsetSet($offset, $value): void
     {
-        $this->jsonDecoded[$offset] = $value;
+        throw new \BadMethodCallException('Message is immutable.');
     }
 
     public function offsetUnset($offset): void
     {
-        unset($this->jsonDecoded[$offset]);
+        throw new \BadMethodCallException('Message is immutable.');
     }
 
     public function __get($name)
@@ -87,11 +98,11 @@ class Message implements \JsonSerializable, ArrayAccess
 
     public function __set($name, $value): void
     {
-        $this->jsonDecoded[$name] = $value;
+        throw new \BadMethodCallException('Message is immutable.');
     }
 
     public function __unset($name): void
     {
-        unset($this->jsonDecoded[$name]);
+        throw new \BadMethodCallException('Message is immutable.');
     }
 }

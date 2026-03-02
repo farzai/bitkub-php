@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\WebSocket\Endpoints;
 
 use Farzai\Bitkub\Endpoints as RestApiEndpoints;
 
 class LiveOrderBookEndpoint extends AbstractEndpoint
 {
+    /** @var array<string, int>|null */
+    private ?array $symbolMap = null;
+
     /**
      * Add event listener.
      *
@@ -14,36 +19,40 @@ class LiveOrderBookEndpoint extends AbstractEndpoint
      * });
      *
      * @param  string|int  $symbol  Symbol name or id.
-     * @param  callable|array<callable>  $listeners
+     * @param  callable|array<callable(\Farzai\Bitkub\WebSocket\Message): void>  $listeners
      */
-    public function listen($symbol, $listeners)
+    public function listen(string|int $symbol, callable|array $listeners): static
     {
-        // Check if symbol is numeric.
         if (! is_numeric($symbol)) {
-
-            $this->getLogger()->debug('Find symbol id by name: '.$symbol);
-
-            // Find symbol id by name.
-            $market = new RestApiEndpoints\MarketEndpoint($this->websocket->getClient());
-
-            foreach ($market->symbols()->throw()->json('result') as $item) {
-                if ($item['symbol'] === strtoupper(trim($symbol))) {
-                    $symbol = $item['id'];
-
-                    $this->getLogger()->debug('Found symbol id: '.$symbol);
-                    break;
-                }
-            }
-
-            if (! is_numeric($symbol)) {
-                $this->getLogger()->debug('Invalid symbol name. Given: '.$symbol);
-
-                throw new \InvalidArgumentException('Invalid symbol name. Given: '.$symbol);
-            }
+            $symbol = $this->resolveSymbolId((string) $symbol);
         }
 
         $this->websocket->addListener('orderbook/'.$symbol, $listeners);
 
         return $this;
+    }
+
+    private function resolveSymbolId(string $symbol): int
+    {
+        $client = $this->websocket->getClient();
+        if ($client === null) {
+            throw new \RuntimeException('A REST client is required to resolve symbol names. Use numeric symbol IDs or set a client via WebSocketClientBuilder::setClient().');
+        }
+
+        if ($this->symbolMap === null) {
+            $this->symbolMap = [];
+            $market = new RestApiEndpoints\MarketEndpoint($client);
+
+            foreach ($market->symbols()->throw()->json('result') as $item) {
+                $this->symbolMap[strtoupper($item['symbol'])] = $item['id'];
+            }
+        }
+
+        $key = strtoupper(trim($symbol));
+        if (! isset($this->symbolMap[$key])) {
+            throw new \InvalidArgumentException('Invalid symbol name. Given: '.$symbol);
+        }
+
+        return $this->symbolMap[$key];
     }
 }

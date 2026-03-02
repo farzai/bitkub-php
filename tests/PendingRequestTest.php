@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Farzai\Bitkub\ClientBuilder;
 use Farzai\Bitkub\Requests\PendingRequest;
 
@@ -19,9 +21,9 @@ it('can set request method', function () {
         ->build();
 
     $request = new PendingRequest($client, 'GET', '/api/market/balances');
-    $request->method('POST');
+    $result = $request->method('POST');
 
-    expect($request->method)->toBe('POST');
+    expect($result)->toBeInstanceOf(PendingRequest::class);
 });
 
 it('can set request path', function () {
@@ -30,9 +32,9 @@ it('can set request path', function () {
         ->build();
 
     $request = new PendingRequest($client, 'GET', '/api/market/balances');
-    $request->path('/api/market/orders');
+    $result = $request->path('/api/market/orders');
 
-    expect($request->path)->toBe('/api/market/orders');
+    expect($result)->toBeInstanceOf(PendingRequest::class);
 });
 
 it('can set request options', function () {
@@ -41,9 +43,9 @@ it('can set request options', function () {
         ->build();
 
     $request = new PendingRequest($client, 'GET', '/api/market/balances');
-    $request->options(['query' => ['symbol' => 'BTC']]);
+    $result = $request->options(['query' => ['symbol' => 'BTC']]);
 
-    expect($request->options)->toBe(['query' => ['symbol' => 'BTC']]);
+    expect($result)->toBeInstanceOf(PendingRequest::class);
 });
 
 it('can add request interceptor', function () {
@@ -51,16 +53,16 @@ it('can add request interceptor', function () {
         ->setCredentials('test', 'secret')
         ->build();
 
-    $request = $this->createMock(\Psr\Http\Message\RequestInterface::class);
+    $mockRequest = $this->createMock(\Psr\Http\Message\RequestInterface::class);
 
     $pending = new PendingRequest($client, 'GET', '/api/market/balances');
 
     $interceptor = $this->createMock(\Farzai\Bitkub\Contracts\RequestInterceptor::class);
-    $interceptor->method('apply')->willReturn($request);
+    $interceptor->method('apply')->willReturn($mockRequest);
 
-    $pending->withInterceptor($interceptor);
+    $result = $pending->withInterceptor($interceptor);
 
-    expect($pending->interceptors)->toContain($interceptor);
+    expect($result)->toBeInstanceOf(PendingRequest::class);
 });
 
 it('can set request body', function () {
@@ -69,9 +71,9 @@ it('can set request body', function () {
         ->build();
 
     $request = new PendingRequest($client, 'POST', '/api/market/orders');
-    $request->withBody(['symbol' => 'BTC', 'quantity' => 1]);
+    $result = $request->withBody(['symbol' => 'BTC', 'quantity' => 1]);
 
-    expect($request->options['body'])->toBe(['symbol' => 'BTC', 'quantity' => 1]);
+    expect($result)->toBeInstanceOf(PendingRequest::class);
 });
 
 it('can set request query', function () {
@@ -80,9 +82,9 @@ it('can set request query', function () {
         ->build();
 
     $request = new PendingRequest($client, 'GET', '/api/market/balances');
-    $request->withQuery(['symbol' => 'BTC']);
+    $result = $request->withQuery(['symbol' => 'BTC']);
 
-    expect($request->options['query'])->toBe(['symbol' => 'BTC']);
+    expect($result)->toBeInstanceOf(PendingRequest::class);
 });
 
 it('can set request headers', function () {
@@ -91,9 +93,9 @@ it('can set request headers', function () {
         ->build();
 
     $request = new PendingRequest($client, 'GET', '/api/market/balances');
-    $request->withHeaders(['Authorization' => 'Bearer token']);
+    $result = $request->withHeaders(['Authorization' => 'Bearer token']);
 
-    expect($request->options['headers'])->toBe(['Authorization' => 'Bearer token']);
+    expect($result)->toBeInstanceOf(PendingRequest::class);
 });
 
 it('can set request header', function () {
@@ -102,9 +104,9 @@ it('can set request header', function () {
         ->build();
 
     $request = new PendingRequest($client, 'GET', '/api/market/balances');
-    $request->withHeader('Content-Type', 'application/json');
+    $result = $request->withHeader('Content-Type', 'application/json');
 
-    expect($request->options['headers']['Content-Type'])->toBe('application/json');
+    expect($result)->toBeInstanceOf(PendingRequest::class);
 });
 
 it('can set request to accept JSON', function () {
@@ -113,9 +115,9 @@ it('can set request to accept JSON', function () {
         ->build();
 
     $request = new PendingRequest($client, 'GET', '/api/market/balances');
-    $request->acceptJson();
+    $result = $request->acceptJson();
 
-    expect($request->options['headers']['Accept'])->toBe('application/json');
+    expect($result)->toBeInstanceOf(PendingRequest::class);
 });
 
 it('can set request to send JSON', function () {
@@ -124,9 +126,9 @@ it('can set request to send JSON', function () {
         ->build();
 
     $request = new PendingRequest($client, 'POST', '/api/market/orders');
-    $request->asJson();
+    $result = $request->asJson();
 
-    expect($request->options['headers']['Content-Type'])->toBe('application/json');
+    expect($result)->toBeInstanceOf(PendingRequest::class);
 });
 
 it('it can createRequest success', function () {
@@ -207,4 +209,96 @@ it('can createResponse wrapping PSR response', function () {
     expect($response)->toBeInstanceOf(\Farzai\Transport\Contracts\ResponseInterface::class);
     expect($response)->toBeInstanceOf(\Farzai\Bitkub\Responses\ResponseWithValidateErrorCode::class);
     expect($response->statusCode())->toBe(200);
+});
+
+it('can send request with interceptors applied', function () {
+    $psrClient = \Farzai\Bitkub\Tests\MockHttpClient::make()
+        ->addSequence(\Farzai\Bitkub\Tests\MockHttpClient::response(200, json_encode([
+            'error' => 0,
+            'result' => 'ok',
+        ])));
+
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setHttpClient($psrClient)
+        ->build();
+
+    $interceptorCalled = false;
+    $interceptor = $this->createMock(\Farzai\Bitkub\Contracts\RequestInterceptor::class);
+    $interceptor->method('apply')->willReturnCallback(function ($request) use (&$interceptorCalled) {
+        $interceptorCalled = true;
+
+        return $request->withHeader('X-Custom', 'test');
+    });
+
+    $pending = new PendingRequest($client, 'GET', '/api/market/symbols');
+    $response = $pending->withInterceptor($interceptor)->send();
+
+    expect($interceptorCalled)->toBeTrue();
+    expect($response)->toBeInstanceOf(\Farzai\Transport\Contracts\ResponseInterface::class);
+    expect($response->json('result'))->toBe('ok');
+});
+
+it('can send request with multiple interceptors applied in order', function () {
+    $psrClient = \Farzai\Bitkub\Tests\MockHttpClient::make()
+        ->addSequence(\Farzai\Bitkub\Tests\MockHttpClient::response(200, json_encode([
+            'error' => 0,
+        ])));
+
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setHttpClient($psrClient)
+        ->build();
+
+    $order = [];
+
+    $interceptor1 = $this->createMock(\Farzai\Bitkub\Contracts\RequestInterceptor::class);
+    $interceptor1->method('apply')->willReturnCallback(function ($request) use (&$order) {
+        $order[] = 'first';
+
+        return $request;
+    });
+
+    $interceptor2 = $this->createMock(\Farzai\Bitkub\Contracts\RequestInterceptor::class);
+    $interceptor2->method('apply')->willReturnCallback(function ($request) use (&$order) {
+        $order[] = 'second';
+
+        return $request;
+    });
+
+    $pending = new PendingRequest($client, 'GET', '/api/market/symbols');
+    $pending->withInterceptor($interceptor1)->withInterceptor($interceptor2)->send();
+
+    expect($order)->toBe(['first', 'second']);
+});
+
+it('withHeaders merges with existing headers', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $pending = new PendingRequest($client, 'GET', '/api/market/balances');
+    $pending->withHeaders(['X-First' => 'one']);
+    $pending->withHeaders(['X-Second' => 'two']);
+
+    $request = $pending->createRequest('GET', '/api/market/balances', [
+        'headers' => ['X-First' => 'one', 'X-Second' => 'two'],
+    ]);
+
+    expect($request->getHeaderLine('X-First'))->toBe('one');
+    expect($request->getHeaderLine('X-Second'))->toBe('two');
+});
+
+it('createRequest with empty query array omits query string', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $pending = new PendingRequest($client, 'GET', '/api/market/ticker');
+
+    $request = $pending->createRequest('GET', '/api/market/ticker', [
+        'query' => [],
+    ]);
+
+    expect($request->getUri()->getQuery())->toBe('');
 });

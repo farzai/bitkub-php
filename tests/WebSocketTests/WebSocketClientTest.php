@@ -1,31 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 use Farzai\Bitkub\ClientBuilder;
 use Farzai\Bitkub\Tests\MockHttpClient;
+use Farzai\Bitkub\Tests\WebSocketTests\MockWebSocketEngine;
 use Farzai\Bitkub\WebSocket\Endpoints\AbstractEndpoint;
 use Farzai\Bitkub\WebSocket\Endpoints\LiveOrderBookEndpoint;
 use Farzai\Bitkub\WebSocket\Endpoints\MarketEndpoint;
 use Farzai\Bitkub\WebSocketClient;
+use Farzai\Bitkub\WebSocketClientBuilder;
 
-it('should create new instance of WebSocketClient', function () {
-    $client = new WebSocketClient(
-        $baseClient = ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-            ->build()
-    );
+it('should create new instance of WebSocketClient via builder', function () {
+    $baseClient = ClientBuilder::create()
+        ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
+        ->build();
 
-    expect($client)->toBeInstanceOf(WebSocketClient::class);
+    $ws = WebSocketClientBuilder::create()
+        ->setClient($baseClient)
+        ->build();
 
-    expect($client->getConfig())->toBe($baseClient->getConfig());
-    expect($client->getLogger())->toBe($baseClient->getLogger());
+    expect($ws)->toBeInstanceOf(WebSocketClient::class);
+    expect($ws->getConfig())->toBe($baseClient->getConfig());
 });
 
 it('should add listener success', function () {
-    $client = new WebSocketClient(
-        ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-            ->build()
-    );
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
 
     $client->addListener('market.trade.thb_btc', function () {
         //
@@ -43,11 +44,8 @@ it('should add listener success', function () {
 });
 
 it('should add listener with array', function () {
-    $client = new WebSocketClient(
-        ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-            ->build()
-    );
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
 
     $client->addListener('market.trade.thb_btc', [
         function () {
@@ -75,36 +73,30 @@ it('should add listener with array', function () {
 });
 
 it('should call run on endpoint success', function () {
-    $client = $this->createMock(WebSocketClient::class);
-    $client->expects($this->once())->method('run');
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
 
     $endpoint = new MarketEndpoint($client);
 
     expect($endpoint)->toBeInstanceOf(AbstractEndpoint::class);
 
     $endpoint->run();
+
+    expect($engine->wasHandled())->toBeTrue();
 });
 
-it('should call handle on client success', function () {
+it('should call handle on engine when run is invoked', function () {
     $engine = $this->createMock(\Farzai\Bitkub\Contracts\WebSocketEngineInterface::class);
     $engine->expects($this->once())->method('handle');
 
-    $client = new WebSocketClient(
-        ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-            ->build(),
-        $engine,
-    );
+    $client = new WebSocketClient($engine);
 
     $client->run();
 });
 
 it('should create new instance of market endpoint', function () {
-    $client = new WebSocketClient(
-        ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-            ->build()
-    );
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
 
     $endpoint = new MarketEndpoint($client);
 
@@ -112,11 +104,8 @@ it('should create new instance of market endpoint', function () {
 });
 
 it('can put stream name as string success', function () {
-    $client = new WebSocketClient(
-        ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-            ->build()
-    );
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
 
     $endpoint = new MarketEndpoint($client);
 
@@ -136,11 +125,8 @@ it('can put stream name as string success', function () {
 });
 
 it('can put stream name with array success', function () {
-    $client = new WebSocketClient(
-        ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-            ->build()
-    );
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
 
     $endpoint = new MarketEndpoint($client);
 
@@ -168,11 +154,8 @@ it('can put stream name with array success', function () {
 });
 
 it('should create live order book endpoint success', function () {
-    $client = new WebSocketClient(
-        ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-            ->build()
-    );
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
 
     $endpoint = new LiveOrderBookEndpoint($client);
 
@@ -180,11 +163,8 @@ it('should create live order book endpoint success', function () {
 });
 
 it('can put symbol by id success', function () {
-    $client = new WebSocketClient(
-        ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-            ->build()
-    );
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
 
     $endpoint = new LiveOrderBookEndpoint($client);
 
@@ -225,12 +205,13 @@ it('can put symbol by name success', function () {
         ->addSequence(MockHttpClient::response(200, json_encode($symbolResponseBody)))
         ->addSequence(MockHttpClient::response(200, json_encode($symbolResponseBody)));
 
-    $client = new WebSocketClient(
-        ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-            ->setHttpClient($httpClient)
-            ->build()
-    );
+    $baseClient = ClientBuilder::create()
+        ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
+        ->setHttpClient($httpClient)
+        ->build();
+
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine, $baseClient);
 
     $endpoint = new LiveOrderBookEndpoint($client);
 
@@ -277,12 +258,13 @@ it('should throw error if invalid symbol name', function () {
     $httpClient = MockHttpClient::make()
         ->addSequence(MockHttpClient::response(200, json_encode($symbolResponseBody)));
 
-    $client = new WebSocketClient(
-        ClientBuilder::create()
-            ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
-            ->setHttpClient($httpClient)
-            ->build()
-    );
+    $baseClient = ClientBuilder::create()
+        ->setCredentials('YOUR_API_KEY', 'YOUR_SECRET')
+        ->setHttpClient($httpClient)
+        ->build();
+
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine, $baseClient);
 
     $endpoint = new LiveOrderBookEndpoint($client);
 
@@ -290,3 +272,72 @@ it('should throw error if invalid symbol name', function () {
         //
     });
 })->throws(\InvalidArgumentException::class, 'Invalid symbol name. Given: thb_xxx');
+
+it('returns same market endpoint instance (lazy singleton)', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+
+    $first = $client->market();
+    $second = $client->market();
+
+    expect($first)->toBe($second);
+});
+
+it('returns same liveOrderBook endpoint instance (lazy singleton)', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+
+    $first = $client->liveOrderBook();
+    $second = $client->liveOrderBook();
+
+    expect($first)->toBe($second);
+});
+
+it('addListener returns static for chaining', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+
+    $result = $client->addListener('test', function () {});
+
+    expect($result)->toBe($client);
+});
+
+it('getConfig returns empty array when no client set', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+
+    expect($client->getConfig())->toBe([]);
+});
+
+it('getClient returns null when no client set', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+
+    expect($client->getClient())->toBeNull();
+});
+
+it('getLogger returns NullLogger when no logger or client set', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+
+    expect($client->getLogger())->toBeInstanceOf(\Psr\Log\NullLogger::class);
+});
+
+it('getLogger returns explicit logger when set', function () {
+    $engine = new MockWebSocketEngine;
+    $logger = new \Psr\Log\NullLogger;
+    $client = new WebSocketClient($engine, null, $logger);
+
+    expect($client->getLogger())->toBe($logger);
+});
+
+it('getLogger falls back to client logger when no explicit logger', function () {
+    $baseClient = ClientBuilder::create()
+        ->setCredentials('key', 'secret')
+        ->build();
+
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine, $baseClient);
+
+    expect($client->getLogger())->toBe($baseClient->getLogger());
+});

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub\Endpoints;
 
 use Farzai\Bitkub\Contracts\ClientInterface;
@@ -12,6 +14,11 @@ abstract class AbstractEndpoint
     public function __construct(ClientInterface $client)
     {
         $this->client = $client;
+    }
+
+    protected function filterParams(array $params): array
+    {
+        return array_filter($params, fn ($value) => $value !== null && $value !== '');
     }
 
     protected function makeRequest(string $method, string $path, array $options = []): PendingRequest

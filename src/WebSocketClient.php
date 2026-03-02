@@ -1,52 +1,62 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Farzai\Bitkub;
 
 use Farzai\Bitkub\Contracts\ClientInterface;
 use Farzai\Bitkub\Contracts\WebSocketEngineInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class WebSocketClient
 {
-    private ClientInterface $client;
-
-    private Contracts\WebSocketEngineInterface $websocket;
-
     /**
-     * @var array<string, array<mixed>>
+     * @var array<string, array<callable(\Farzai\Bitkub\WebSocket\Message): void>>
      */
     private array $listeners = [];
 
+    private ?WebSocket\Endpoints\MarketEndpoint $marketEndpoint = null;
+
+    private ?WebSocket\Endpoints\LiveOrderBookEndpoint $liveOrderBookEndpoint = null;
+
     public function __construct(
-        ClientInterface $client,
-        ?WebSocketEngineInterface $websocket = null
-    ) {
-        $this->client = $client;
-        $this->websocket = $websocket ?: new WebSocket\Engine($this->getLogger());
-    }
+        private WebSocketEngineInterface $engine,
+        private ?ClientInterface $client = null,
+        private ?LoggerInterface $logger = null,
+    ) {}
 
     public function getConfig(): array
     {
-        return $this->client->getConfig();
+        return $this->client?->getConfig() ?? [];
     }
 
     public function getLogger(): LoggerInterface
     {
-        return $this->client->getLogger();
+        return $this->logger ?? $this->client?->getLogger() ?? new NullLogger;
     }
 
-    public function getClient(): ClientInterface
+    public function getClient(): ?ClientInterface
     {
         return $this->client;
+    }
+
+    public function market(): WebSocket\Endpoints\MarketEndpoint
+    {
+        return $this->marketEndpoint ??= new WebSocket\Endpoints\MarketEndpoint($this);
+    }
+
+    public function liveOrderBook(): WebSocket\Endpoints\LiveOrderBookEndpoint
+    {
+        return $this->liveOrderBookEndpoint ??= new WebSocket\Endpoints\LiveOrderBookEndpoint($this);
     }
 
     /**
      * Add event listener.
      *
-     * @param  callable|array<callable>  $listener
-     * @return $this
+     * @param  callable|array<callable(\Farzai\Bitkub\WebSocket\Message): void>  $listener
      */
-    public function addListener(string $event, $listener)
+    public function addListener(string $event, callable|array $listener): static
     {
         if (! isset($this->listeners[$event])) {
             $this->listeners[$event] = [];
@@ -57,13 +67,16 @@ class WebSocketClient
         return $this;
     }
 
+    /**
+     * @return array<string, array<callable(\Farzai\Bitkub\WebSocket\Message): void>>
+     */
     public function getListeners(): array
     {
         return $this->listeners;
     }
 
-    public function run()
+    public function run(): void
     {
-        $this->websocket->handle($this->listeners);
+        $this->engine->handle($this->listeners);
     }
 }
