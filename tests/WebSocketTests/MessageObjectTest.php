@@ -103,3 +103,46 @@ it('accepts pre-decoded array and skips json_decode', function () {
     expect($message->json('price'))->toBe(42000);
     expect($message->getBody())->toBe($body);
 });
+
+it('offsetGet returns null for missing key', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect($message['nonexistent'])->toBeNull();
+});
+
+it('offsetExists returns false for missing key', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect($message->offsetExists('nonexistent'))->toBeFalse();
+});
+
+it('__get returns null for missing key', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect($message->nonexistent)->toBeNull();
+});
+
+it('__isset returns false for missing key', function () {
+    $body = json_encode(['event' => 'test']);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect(isset($message->nonexistent))->toBeFalse();
+});
+
+it('json with key returns null on invalid json body', function () {
+    $body = 'not json';
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect($message->json('somekey'))->toBeNull();
+});
+
+it('jsonSerialize returns same as toArray', function () {
+    $decoded = ['event' => 'trade', 'data' => [1, 2, 3]];
+    $body = json_encode($decoded);
+    $message = new Message($body, Carbon::now()->toDateTimeImmutable());
+
+    expect($message->jsonSerialize())->toBe($message->toArray());
+});

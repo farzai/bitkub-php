@@ -80,3 +80,39 @@ it('uses client logger when no explicit logger set', function () {
 
     expect($ws->getLogger())->toBe($baseClient->getLogger());
 });
+
+it('allows zero reconnect attempts', function () {
+    $ws = WebSocketClientBuilder::create()
+        ->setReconnectAttempts(0)
+        ->build();
+
+    expect($ws)->toBeInstanceOf(WebSocketClient::class);
+});
+
+it('allows zero reconnect delay', function () {
+    $ws = WebSocketClientBuilder::create()
+        ->setReconnectDelayMs(0)
+        ->build();
+
+    expect($ws)->toBeInstanceOf(WebSocketClient::class);
+});
+
+it('can set reconnect attempts and delay with custom values', function () {
+    $engine = new MockWebSocketEngine;
+
+    $ws = WebSocketClientBuilder::create()
+        ->setEngine($engine)
+        ->setReconnectAttempts(5)
+        ->setReconnectDelayMs(2000)
+        ->build();
+
+    expect($ws)->toBeInstanceOf(WebSocketClient::class);
+});
+
+it('builder methods return static for chaining', function () {
+    $builder = WebSocketClientBuilder::create();
+
+    expect($builder->setBaseUrl('wss://example.com/'))->toBe($builder);
+    expect($builder->setReconnectAttempts(3))->toBe($builder);
+    expect($builder->setReconnectDelayMs(1000))->toBe($builder);
+});

@@ -44,6 +44,10 @@ class Message implements \JsonSerializable, ArrayAccess
             return $this->jsonDecoded;
         }
 
+        if ($this->jsonDecoded === null) {
+            return null;
+        }
+
         return Arr::get($this->jsonDecoded, $key);
     }
 

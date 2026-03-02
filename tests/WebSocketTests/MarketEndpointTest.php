@@ -49,3 +49,44 @@ it('supports comma-separated stream names as string', function () {
     expect($listeners)->toHaveKey('market.trade.thb_btc');
     expect($listeners)->toHaveKey('market.trade.thb_eth');
 });
+
+it('filters empty entries from comma-separated string', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+    $endpoint = new MarketEndpoint($client);
+
+    $endpoint->listen('trade.thb_btc,,, trade.thb_eth,', function () {});
+
+    $listeners = $client->getListeners();
+    expect($listeners)->toHaveCount(2);
+    expect($listeners)->toHaveKey('market.trade.thb_btc');
+    expect($listeners)->toHaveKey('market.trade.thb_eth');
+});
+
+it('supports array of listeners', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+    $endpoint = new MarketEndpoint($client);
+
+    $endpoint->listen('trade.thb_btc', [
+        function () {},
+        function () {},
+    ]);
+
+    $listeners = $client->getListeners();
+    expect($listeners)->toHaveCount(1);
+    expect($listeners['market.trade.thb_btc'])->toHaveCount(2);
+});
+
+it('handles stream names with whitespace trimming', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+    $endpoint = new MarketEndpoint($client);
+
+    $endpoint->listen('  trade.thb_btc  ,  trade.thb_eth  ', function () {});
+
+    $listeners = $client->getListeners();
+    expect($listeners)->toHaveCount(2);
+    expect($listeners)->toHaveKey('market.trade.thb_btc');
+    expect($listeners)->toHaveKey('market.trade.thb_eth');
+});

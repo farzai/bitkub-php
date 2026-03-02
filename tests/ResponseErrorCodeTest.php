@@ -190,3 +190,77 @@ it('decorator delegates PSR-7 getBody', function () {
 
     expect($response->getBody())->toBeInstanceOf(\Psr\Http\Message\StreamInterface::class);
 });
+
+it('decorator delegates getReasonPhrase', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode(['error' => 0]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    expect($response->getReasonPhrase())->toBeString();
+});
+
+it('decorator delegates getProtocolVersion', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode(['error' => 0]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    expect($response->getProtocolVersion())->toBeString();
+});
+
+it('decorator delegates getHeaders via PSR-7', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode(['error' => 0]), [
+        'Content-Type' => 'application/json',
+    ]);
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    expect($response->getHeaders())->toBeArray();
+});
+
+it('decorator delegates hasHeader', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode(['error' => 0]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    // The mock may or may not have headers, but hasHeader should return a bool
+    expect($response->hasHeader('Content-Type'))->toBeBool();
+});
+
+it('decorator delegates getHeader', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode(['error' => 0]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    expect($response->getHeader('Content-Type'))->toBeArray();
+});
+
+it('decorator delegates getHeaderLine', function () {
+    $psrRequest = $this->createMock(PsrRequestInterface::class);
+    $psrResponse = MockHttpClient::response(200, json_encode(['error' => 0]));
+
+    $response = new Response($psrRequest, $psrResponse);
+    $response = new ResponseWithValidateErrorCode($response);
+
+    expect($response->getHeaderLine('Content-Type'))->toBeString();
+});
+
+it('exception with unknown error code uses fallback message', function () {
+    $psrResponse = MockHttpClient::response(200, json_encode([
+        'error' => 12345,
+    ]));
+
+    $exception = new BitkubResponseErrorCodeException($psrResponse);
+
+    expect($exception->getCode())->toBe(12345);
+    expect($exception->getMessage())->toBe('Unknown error code: 12345');
+});

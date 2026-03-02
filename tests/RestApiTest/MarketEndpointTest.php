@@ -471,6 +471,82 @@ it('should get myOrderInfo success', function () {
     expect($response->json('result.status'))->toBe('filled');
 });
 
+it('should get ticker with symbol param success', function () {
+    $psrClient = MockHttpClient::make()
+        ->addSequence(fn ($client) => $client->createResponse(200, json_encode([
+            'THB_BTC' => [
+                'id' => 1,
+                'last' => 216415.00,
+                'lowestAsk' => 216678.00,
+                'highestBid' => 215000.00,
+                'percentChange' => 1.91,
+                'baseVolume' => 71.02603946,
+                'quoteVolume' => 15302897.99,
+                'isFrozen' => 0,
+                'high24hr' => 221396.00,
+                'low24hr' => 206414.00,
+            ],
+        ])));
+
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setHttpClient($psrClient)
+        ->build();
+
+    $market = $client->market();
+
+    $response = $market->ticker('THB_BTC');
+
+    expect($response)->toBeInstanceOf(ResponseInterface::class);
+    expect($response->json('THB_BTC.id'))->toBe(1);
+});
+
+it('should handle trades with null params without error', function () {
+    $psrClient = MockHttpClient::make()
+        ->addSequence(fn ($client) => $client->createResponse(200, json_encode([
+            'error' => 0,
+            'result' => [],
+        ])));
+
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setHttpClient($psrClient)
+        ->build();
+
+    $market = $client->market();
+
+    $response = $market->trades([
+        'sym' => 'THB_BTC',
+        'lmt' => null,
+    ]);
+
+    expect($response)->toBeInstanceOf(ResponseInterface::class);
+    expect($response->json('error'))->toBe(0);
+});
+
+it('should handle trades with empty string params without error', function () {
+    $psrClient = MockHttpClient::make()
+        ->addSequence(fn ($client) => $client->createResponse(200, json_encode([
+            'error' => 0,
+            'result' => [],
+        ])));
+
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setHttpClient($psrClient)
+        ->build();
+
+    $market = $client->market();
+
+    $response = $market->trades([
+        'sym' => 'THB_BTC',
+        'lmt' => '',
+    ]);
+
+    expect($response)->toBeInstanceOf(ResponseInterface::class);
+    expect($response->json('error'))->toBe(0);
+});
+
 it('should call cancelOrder success', function () {
     $psrClient = MockHttpClient::make()
         ->addSequence(fn ($client) => MockHttpClient::responseServerTimestamp())

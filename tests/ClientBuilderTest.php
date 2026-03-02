@@ -64,3 +64,94 @@ it('should throw exception when retries is negative', function () {
     ClientBuilder::create()
         ->setRetries(-1);
 })->throws(\InvalidArgumentException::class, 'Retries must be greater than or equal to 0.');
+
+it('can set retries to zero', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setRetries(0)
+        ->build();
+
+    expect($client)->toBeInstanceOf(Client::class);
+});
+
+it('returns same market endpoint instance (lazy singleton)', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $first = $client->market();
+    $second = $client->market();
+
+    expect($first)->toBe($second);
+});
+
+it('returns same crypto endpoint instance (lazy singleton)', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $first = $client->crypto();
+    $second = $client->crypto();
+
+    expect($first)->toBe($second);
+});
+
+it('returns same user endpoint instance (lazy singleton)', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $first = $client->user();
+    $second = $client->user();
+
+    expect($first)->toBe($second);
+});
+
+it('returns same system endpoint instance (lazy singleton)', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $first = $client->system();
+    $second = $client->system();
+
+    expect($first)->toBe($second);
+});
+
+it('can access getTransport', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    expect($client->getTransport())->toBeInstanceOf(\Farzai\Transport\Transport::class);
+});
+
+it('can access getConfig with correct keys', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('my-api-key', 'my-secret')
+        ->build();
+
+    $config = $client->getConfig();
+
+    expect($config)->toHaveKey('api_key', 'my-api-key');
+    expect($config)->toHaveKey('secret', 'my-secret');
+});
+
+it('can access getLogger', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    expect($client->getLogger())->toBeInstanceOf(\Psr\Log\LoggerInterface::class);
+});
+
+it('uses custom logger when set', function () {
+    $logger = new \Psr\Log\NullLogger;
+
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setLogger($logger)
+        ->build();
+
+    expect($client->getLogger())->toBe($logger);
+});

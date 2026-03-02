@@ -210,3 +210,95 @@ it('can createResponse wrapping PSR response', function () {
     expect($response)->toBeInstanceOf(\Farzai\Bitkub\Responses\ResponseWithValidateErrorCode::class);
     expect($response->statusCode())->toBe(200);
 });
+
+it('can send request with interceptors applied', function () {
+    $psrClient = \Farzai\Bitkub\Tests\MockHttpClient::make()
+        ->addSequence(\Farzai\Bitkub\Tests\MockHttpClient::response(200, json_encode([
+            'error' => 0,
+            'result' => 'ok',
+        ])));
+
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setHttpClient($psrClient)
+        ->build();
+
+    $interceptorCalled = false;
+    $interceptor = $this->createMock(\Farzai\Bitkub\Contracts\RequestInterceptor::class);
+    $interceptor->method('apply')->willReturnCallback(function ($request) use (&$interceptorCalled) {
+        $interceptorCalled = true;
+
+        return $request->withHeader('X-Custom', 'test');
+    });
+
+    $pending = new PendingRequest($client, 'GET', '/api/market/symbols');
+    $response = $pending->withInterceptor($interceptor)->send();
+
+    expect($interceptorCalled)->toBeTrue();
+    expect($response)->toBeInstanceOf(\Farzai\Transport\Contracts\ResponseInterface::class);
+    expect($response->json('result'))->toBe('ok');
+});
+
+it('can send request with multiple interceptors applied in order', function () {
+    $psrClient = \Farzai\Bitkub\Tests\MockHttpClient::make()
+        ->addSequence(\Farzai\Bitkub\Tests\MockHttpClient::response(200, json_encode([
+            'error' => 0,
+        ])));
+
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->setHttpClient($psrClient)
+        ->build();
+
+    $order = [];
+
+    $interceptor1 = $this->createMock(\Farzai\Bitkub\Contracts\RequestInterceptor::class);
+    $interceptor1->method('apply')->willReturnCallback(function ($request) use (&$order) {
+        $order[] = 'first';
+
+        return $request;
+    });
+
+    $interceptor2 = $this->createMock(\Farzai\Bitkub\Contracts\RequestInterceptor::class);
+    $interceptor2->method('apply')->willReturnCallback(function ($request) use (&$order) {
+        $order[] = 'second';
+
+        return $request;
+    });
+
+    $pending = new PendingRequest($client, 'GET', '/api/market/symbols');
+    $pending->withInterceptor($interceptor1)->withInterceptor($interceptor2)->send();
+
+    expect($order)->toBe(['first', 'second']);
+});
+
+it('withHeaders merges with existing headers', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $pending = new PendingRequest($client, 'GET', '/api/market/balances');
+    $pending->withHeaders(['X-First' => 'one']);
+    $pending->withHeaders(['X-Second' => 'two']);
+
+    $request = $pending->createRequest('GET', '/api/market/balances', [
+        'headers' => ['X-First' => 'one', 'X-Second' => 'two'],
+    ]);
+
+    expect($request->getHeaderLine('X-First'))->toBe('one');
+    expect($request->getHeaderLine('X-Second'))->toBe('two');
+});
+
+it('createRequest with empty query array omits query string', function () {
+    $client = ClientBuilder::create()
+        ->setCredentials('test', 'secret')
+        ->build();
+
+    $pending = new PendingRequest($client, 'GET', '/api/market/ticker');
+
+    $request = $pending->createRequest('GET', '/api/market/ticker', [
+        'query' => [],
+    ]);
+
+    expect($request->getUri()->getQuery())->toBe('');
+});

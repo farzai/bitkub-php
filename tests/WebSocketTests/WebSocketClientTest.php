@@ -301,3 +301,43 @@ it('addListener returns static for chaining', function () {
 
     expect($result)->toBe($client);
 });
+
+it('getConfig returns empty array when no client set', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+
+    expect($client->getConfig())->toBe([]);
+});
+
+it('getClient returns null when no client set', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+
+    expect($client->getClient())->toBeNull();
+});
+
+it('getLogger returns NullLogger when no logger or client set', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+
+    expect($client->getLogger())->toBeInstanceOf(\Psr\Log\NullLogger::class);
+});
+
+it('getLogger returns explicit logger when set', function () {
+    $engine = new MockWebSocketEngine;
+    $logger = new \Psr\Log\NullLogger;
+    $client = new WebSocketClient($engine, null, $logger);
+
+    expect($client->getLogger())->toBe($logger);
+});
+
+it('getLogger falls back to client logger when no explicit logger', function () {
+    $baseClient = ClientBuilder::create()
+        ->setCredentials('key', 'secret')
+        ->build();
+
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine, $baseClient);
+
+    expect($client->getLogger())->toBe($baseClient->getLogger());
+});

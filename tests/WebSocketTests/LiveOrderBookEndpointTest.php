@@ -100,3 +100,53 @@ it('listen returns static for chaining', function () {
 
     expect($result)->toBe($endpoint);
 });
+
+it('accepts numeric string as symbol ID', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+    $endpoint = new LiveOrderBookEndpoint($client);
+
+    $endpoint->listen('42', function () {});
+
+    expect($client->getListeners())->toHaveKey('orderbook/42');
+});
+
+it('resolves symbol names case-insensitively', function () {
+    $symbolResponseBody = [
+        'error' => 0,
+        'result' => [
+            ['id' => 1, 'symbol' => 'THB_BTC', 'info' => 'Thai Baht to Bitcoin'],
+        ],
+    ];
+
+    $httpClient = MockHttpClient::make()
+        ->addSequence(MockHttpClient::response(200, json_encode($symbolResponseBody)));
+
+    $baseClient = ClientBuilder::create()
+        ->setCredentials('key', 'secret')
+        ->setHttpClient($httpClient)
+        ->build();
+
+    $engine = new MockWebSocketEngine;
+    $wsClient = new WebSocketClient($engine, $baseClient);
+    $endpoint = new LiveOrderBookEndpoint($wsClient);
+
+    // Mixed case should still resolve
+    $endpoint->listen('Thb_Btc', function () {});
+
+    expect($wsClient->getListeners())->toHaveKey('orderbook/1');
+});
+
+it('supports array of listeners', function () {
+    $engine = new MockWebSocketEngine;
+    $client = new WebSocketClient($engine);
+    $endpoint = new LiveOrderBookEndpoint($client);
+
+    $endpoint->listen(1, [
+        function () {},
+        function () {},
+    ]);
+
+    expect($client->getListeners())->toHaveKey('orderbook/1');
+    expect($client->getListeners()['orderbook/1'])->toHaveCount(2);
+});
