@@ -6,7 +6,7 @@ use Farzai\Bitkub\Contracts\ClientInterface;
 use Farzai\Bitkub\Contracts\RequestInterceptor;
 use Farzai\Bitkub\Responses\ResponseWithValidateErrorCode;
 use Farzai\Transport\Contracts\ResponseInterface;
-use Farzai\Transport\Request;
+use Farzai\Transport\RequestBuilder;
 use Farzai\Transport\Response;
 use Psr\Http\Message\RequestInterface as PsrRequestInterface;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
@@ -146,25 +146,27 @@ class PendingRequest
         // Normalize path
         $path = '/'.trim($path, '/');
 
+        $builder = (new RequestBuilder)->method($method)->uri($path);
+
         // Query
         if (isset($options['query']) && is_array($options['query']) && ! empty($options['query'])) {
-            $path .= '?'.http_build_query($options['query']);
+            $builder = $builder->withQuery($options['query']);
         }
 
         // Set body
         if (isset($options['body'])) {
             $body = $options['body'];
-
-            // Convert array to json
-            if (is_array($body)) {
-                $body = json_encode($body);
-            }
+            $builder = is_array($body)
+                ? $builder->withJson($body)
+                : $builder->withBody($body);
         }
 
         // Set headers
-        $headers = $options['headers'] ?? [];
+        if (! empty($options['headers'])) {
+            $builder = $builder->withHeaders($options['headers']);
+        }
 
-        return new Request($method, $path, $headers, $body ?? null);
+        return $builder->build();
     }
 
     /**

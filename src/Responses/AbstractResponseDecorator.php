@@ -3,13 +3,11 @@
 namespace Farzai\Bitkub\Responses;
 
 use Farzai\Transport\Contracts\ResponseInterface;
-use Farzai\Transport\Traits\PsrResponseTrait;
 use Psr\Http\Message\RequestInterface as PsrRequestInterface;
+use Psr\Http\Message\StreamInterface;
 
 abstract class AbstractResponseDecorator implements ResponseInterface
 {
-    use PsrResponseTrait;
-
     protected ResponseInterface $response;
 
     /**
@@ -45,11 +43,11 @@ abstract class AbstractResponseDecorator implements ResponseInterface
     }
 
     /**
-     * Check if the response is successfull.
+     * Check if the response is successful.
      */
-    public function isSuccessfull(): bool
+    public function isSuccessful(): bool
     {
-        return $this->response->isSuccessfull();
+        return $this->response->isSuccessful();
     }
 
     /**
@@ -61,15 +59,31 @@ abstract class AbstractResponseDecorator implements ResponseInterface
     }
 
     /**
-     * Throw an exception if the response is not successfull.
-     *
-     * @param  callable<\Farzai\Transport\Contracts\ResponseInterface>  $callback Custom callback to throw an exception.
+     * Return the json decoded response or null.
+     */
+    public function jsonOrNull(?string $key = null): mixed
+    {
+        return $this->response->jsonOrNull($key);
+    }
+
+    /**
+     * Return the response as an array.
+     */
+    public function toArray(): array
+    {
+        return $this->response->toArray();
+    }
+
+    /**
+     * Throw an exception if the response is not successful.
      *
      * @throws \Psr\Http\Client\ClientExceptionInterface
      */
-    public function throw(?callable $callback = null)
+    public function throw(?callable $callback = null): static
     {
-        return $this->response->throw($callback);
+        $this->response->throw($callback);
+
+        return $this;
     }
 
     /**
@@ -78,5 +92,85 @@ abstract class AbstractResponseDecorator implements ResponseInterface
     public function getPsrRequest(): PsrRequestInterface
     {
         return $this->response->getPsrRequest();
+    }
+
+    // PSR-7 ResponseInterface delegation
+
+    public function getStatusCode(): int
+    {
+        return $this->response->getStatusCode();
+    }
+
+    public function withStatus(int $code, string $reasonPhrase = ''): static
+    {
+        return $this->cloneWithResponse($this->response->withStatus($code, $reasonPhrase));
+    }
+
+    public function getReasonPhrase(): string
+    {
+        return $this->response->getReasonPhrase();
+    }
+
+    public function getProtocolVersion(): string
+    {
+        return $this->response->getProtocolVersion();
+    }
+
+    public function withProtocolVersion(string $version): static
+    {
+        return $this->cloneWithResponse($this->response->withProtocolVersion($version));
+    }
+
+    public function getHeaders(): array
+    {
+        return $this->response->getHeaders();
+    }
+
+    public function hasHeader(string $name): bool
+    {
+        return $this->response->hasHeader($name);
+    }
+
+    public function getHeader(string $name): array
+    {
+        return $this->response->getHeader($name);
+    }
+
+    public function getHeaderLine(string $name): string
+    {
+        return $this->response->getHeaderLine($name);
+    }
+
+    public function withHeader(string $name, $value): static
+    {
+        return $this->cloneWithResponse($this->response->withHeader($name, $value));
+    }
+
+    public function withAddedHeader(string $name, $value): static
+    {
+        return $this->cloneWithResponse($this->response->withAddedHeader($name, $value));
+    }
+
+    public function withoutHeader(string $name): static
+    {
+        return $this->cloneWithResponse($this->response->withoutHeader($name));
+    }
+
+    public function getBody(): StreamInterface
+    {
+        return $this->response->getBody();
+    }
+
+    public function withBody(StreamInterface $body): static
+    {
+        return $this->cloneWithResponse($this->response->withBody($body));
+    }
+
+    private function cloneWithResponse(ResponseInterface $response): static
+    {
+        $clone = clone $this;
+        $clone->response = $response;
+
+        return $clone;
     }
 }

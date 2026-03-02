@@ -27,7 +27,7 @@ it('decorator must be instance of ResponseInterface', function () {
     expect($response->headers())->toBe([
         'Content-Type' => 'application/json',
     ]);
-    expect($response->isSuccessfull())->toBeTrue();
+    expect($response->isSuccessful())->toBeTrue();
     expect($response->json('error'))->toBe(0);
     expect($response->getPsrRequest())->toBe($psrRequest);
 });

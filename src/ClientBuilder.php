@@ -100,15 +100,15 @@ final class ClientBuilder
 
         $logger = $this->logger ?? new NullLogger();
 
-        $builder = TransportBuilder::make();
+        $builder = TransportBuilder::make()
+            ->withBaseUri(sprintf('https://%s', self::DEFAULT_HOST))
+            ->setLogger($logger);
+
         if ($this->httpClient) {
-            $builder->setClient($this->httpClient);
+            $builder = $builder->setClient($this->httpClient);
         }
 
-        $builder->setLogger($logger);
-
         $transport = $builder->build();
-        $transport->setUri(sprintf('https://%s', self::DEFAULT_HOST));
 
         $client = new Client(
             config: $this->config,
